@@ -3,6 +3,7 @@ import HeaderSection from './Components/HeaderSection';
 import CodingClubHeader from './Components/Header';
 import Terminal from './Components/Terminal';
 import AboutClub from './Components/About';
+import ClubTechStack from './Components/TechnologyArsenal';
 export default function Page() {
   return (
     <main>
@@ -10,6 +11,7 @@ export default function Page() {
       <HeroScroller />
       <Terminal />
       <AboutClub />
+      <ClubTechStack />
     </main>
   );
 }
