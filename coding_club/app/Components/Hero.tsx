@@ -216,7 +216,7 @@ export default function HeroScroller() {
             <h1 style={{
               ...headSt,
               fontSize: 'clamp(3.5rem,12vw,9rem)',
-              letterSpacing: '-0.02em', marginBottom: 8,
+              letterSpacing: '-0.02em', marginBottom: 9, marginTop: 24,
               background: `linear-gradient(170deg,#ffffff 40%,${G} 100%)`,
               WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
             }}>
