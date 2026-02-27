@@ -47,10 +47,10 @@ const TechNode = ({ tech, index, total, wheelRotation }: { tech: any, index: num
     <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ transform: `rotate(${angle}deg)` }}>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
         <motion.div style={{ rotate: counterRotation }}>
-          <div className="group relative w-12 h-12 md:w-20 md:h-20 bg-zinc-950 border border-white/10 hover:border-red-600 rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 hover:scale-110 cursor-pointer">
+          <div className="group relative w-12 h-12 md:w-20 md:h-20 bg-zinc-950 border border-white/10 hover:border-[#00ff88] rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 hover:scale-110 cursor-pointer">
             <img src={tech.icon} alt={tech.name} className={`w-6 h-6 md:w-10 md:h-10 object-contain ${tech.invert ? 'invert opacity-70' : ''}`} />
             <div className="absolute top-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-              <span className="bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded tracking-wider whitespace-nowrap uppercase">
+              <span className="bg-[#00ff88] text-[#0a0f1e] text-[10px] font-bold px-3 py-1 rounded tracking-wider whitespace-nowrap uppercase">
                 {tech.name}
               </span>
             </div>
@@ -79,7 +79,7 @@ const ScrollWheel = ({ side, techs, progress }: { side: 'left' | 'right', techs:
   return (
     <div className={`absolute top-1/2 -translate-y-1/2 ${sizeClasses} ${positionClasses} z-20`}>
       <div className="absolute inset-0 rounded-full border border-white/5 bg-black/40 backdrop-blur-3xl" />
-      <div className="absolute inset-10 rounded-full border border-dashed border-red-500/10" />
+      <div className="absolute inset-10 rounded-full border border-dashed border-[#00ff88]/10" />
       <motion.div style={{ rotate: smoothRotation }} className="w-full h-full relative">
         {techs.map((tech, i) => (
           <TechNode key={tech.name} tech={tech} index={i} total={techs.length} wheelRotation={smoothRotation} />
@@ -98,29 +98,29 @@ export default function SmoothTechArsenal() {
     <div ref={containerRef} className="relative w-full h-[400vh] bg-[#030303]">
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
         
-        {/* REVERTED TO RED GRADIENT MASK */}
+        {/* REVERTED TO GREEN GRADIENT MASK */}
         <div className="absolute inset-0 z-10 pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)' }}>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-red-600/15 blur-[140px] rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-[#00ff88]/15 blur-[140px] rounded-full" />
           <ScrollWheel side="left" techs={LEFT_TECHS} progress={scrollYProgress} />
           <ScrollWheel side="right" techs={RIGHT_TECHS} progress={scrollYProgress} />
         </div>
 
         {/* Center Content */}
         <motion.div style={{ opacity: textOpacity }} className="relative z-30 text-center max-w-2xl px-6 pointer-events-none">
-          <div className="inline-flex items-center gap-3 px-5 py-2 mb-8 rounded-full border border-red-500/20 bg-zinc-950/90 backdrop-blur-md">
-            <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+          <div className="inline-flex items-center gap-3 px-5 py-2 mb-8 rounded-full border border-[#00ff88]/20 bg-zinc-950/90 backdrop-blur-md">
+            <div className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse" />
             <span className="text-zinc-400 text-xs font-bold tracking-[0.2em] uppercase">The Tech Ecosystem</span>
           </div>
 
           <h2 className="text-6xl md:text-9xl font-black text-white uppercase tracking-tighter leading-none mb-8">
             Digital <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-700 to-red-900">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] via-[#00ff88] to-[#00cfff]">
               Arsenal
             </span>
           </h2>
 
           <p className="text-zinc-500 text-lg md:text-xl font-light leading-relaxed max-w-sm mx-auto">
-            Engineered with high-performance frameworks and low-level precision.
+            Get a chance to work on industry-relevant projects and build your portfolio with the latest technologies.  All with Coding Club Bias!
           </p>
         </motion.div>
 
