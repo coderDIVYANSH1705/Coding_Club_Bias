@@ -1,79 +1,85 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
+const terminalLines = [
+  { text: "systemctl status bias-coding-club.service", color: "text-gray-300" },
+  { text: "● active (running) since Sat 2026-02-28; 42ms ago", color: "text-emerald-500" },
+  { text: "main --init --config ./bias_config.yaml", color: "text-gray-300" },
+  { text: "[INFO] Initializing Birla Institute of Applied Sciences core...", color: "text-white" },
+  { text: "[SUCCESS] Neural engine engaged.", color: "text-emerald-400" },
+  { text: "Ready for input. _", color: "text-white" },
+];
+
 export default function Terminal() {
-  const [mounted, setMounted] = useState(false);
+  const [displayedLines, setDisplayedLines] = useState<string[]>([]);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentCharIndex, setCurrentCharIndex] = useState(0);
 
+  // Typewriter Logic
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+    if (currentLineIndex < terminalLines.length) {
+      const currentFullText = terminalLines[currentLineIndex].text;
+      
+      if (currentCharIndex < currentFullText.length) {
+        const timeout = setTimeout(() => {
+          setCurrentCharIndex((prev) => prev + 1);
+        }, 30); // Speed of typing
+        return () => clearTimeout(timeout);
+      } else {
+        const timeout = setTimeout(() => {
+          setDisplayedLines((prev) => [...prev, currentFullText]);
+          setCurrentLineIndex((prev) => prev + 1);
+          setCurrentCharIndex(0);
+        }, 400); // Pause between lines
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [currentCharIndex, currentLineIndex]);
 
   return (
-    <section className="w-full min-h-screen bg-[#050505] flex items-center justify-center p-6 md:p-20">
+    <section className="w-full min-h-screen bg-[#050505] flex items-center justify-center p-4 md:p-10 font-mono">
       <motion.div 
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        viewport={{ once: true }}
-        className="w-full max-w-4xl aspect-video md:aspect-[16/9] flex flex-col rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-black/40 backdrop-blur-xl"
+        initial={{ opacity: 0, scale: 0.98 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1 }}
+        className="w-full max-w-5xl h-[70vh] flex flex-col rounded-lg overflow-hidden border border-white/5 bg-[#0a0a0a] shadow-[0_0_50px_rgba(0,0,0,0.5)]"
       >
-        {/* MacOS Header */}
-        <div className="h-10 w-full bg-[#1e1e1e]/80 flex items-center px-4 justify-between border-b border-white/5">
-          <div className="flex gap-2">
-            <div className="w-3.5 h-3.5 rounded-full bg-[#ff5f56] shadow-inner shadow-black/20" />
-            <div className="w-3.5 h-3.5 rounded-full bg-[#ffbd2e] shadow-inner shadow-black/20" />
-            <div className="w-3.5 h-3.5 rounded-full bg-[#27c93f] shadow-inner shadow-black/20" />
-          </div>
-          <div className="text-xs font-medium text-gray-500 font-sans tracking-wide">
-            divyansh — zsh — 80x24
-          </div>
-          <div className="w-12" /> {/* Spacer to center the title */}
+        {/* Minimalist Top Bar */}
+        <div className="h-8 w-full bg-[#111] flex items-center px-4 justify-start gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+          <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+          <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+          <span className="ml-4 text-[10px] text-gray-600 uppercase tracking-widest">bias_shell_v1.0.4</span>
         </div>
 
-        {/* Terminal Body */}
-        <div className="flex-1 p-5 md:p-8 font-mono text-sm md:text-base leading-relaxed overflow-y-auto custom-scrollbar">
-          <div className="flex flex-col gap-2">
-            <p className="text-gray-500">Last login: {new Date().toDateString()} on ttys001</p>
-            
-            <div className="flex flex-col gap-1 mt-2">
-              <p className="text-emerald-400">
-                <span className="text-blue-400">➜</span> <span className="text-cyan-400">~</span> <span className="text-gray-300">cd</span> bias-coding-club
-              </p>
-              
-              <p className="text-emerald-400">
-                <span className="text-blue-400">➜</span> <span className="text-cyan-400">bias-coding-club</span> <span className="text-purple-400">git</span>(<span className="text-red-400">main</span>) <span className="text-gray-300">ls -la</span>
-              </p>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-blue-300 mt-1">
-                <span>drwxr-xr-x algorithms</span>
-                <span>drwxr-xr-x system-design</span>
-                <span>drwxr-xr-x open-source</span>
-                <span>-rw-r--r-- README.md</span>
-              </div>
+        {/* Typing Area */}
+        <div className="flex-1 p-6 md:p-10 text-sm md:text-base overflow-y-auto leading-relaxed scroll-smooth">
+          {displayedLines.map((line, idx) => (
+            <div key={idx} className={`mb-2 ${terminalLines[idx].color}`}>
+              <span className="text-gray-600 mr-3">❯</span>
+              {line.replace("_", "")}
             </div>
+          ))}
 
-            <div className="mt-6 space-y-2">
-              <p className="text-yellow-400 font-bold">Initializing Club Protocol...</p>
-              <p className="text-white animate-pulse">
-                [########################################] 100%
-              </p>
-              <p className="text-white mt-4">
-                Welcome to the <span className="text-emerald-400">BIAS Coding Club</span>. 
-                Our mission is to bridge the gap between academic theory and industry 
-                excellence through collaboration and engineering.
-              </p>
+          {/* Current Typing Line */}
+          {currentLineIndex < terminalLines.length && (
+            <div className={`flex items-center ${terminalLines[currentLineIndex].color}`}>
+              <span className="text-gray-600 mr-3">❯</span>
+              {terminalLines[currentLineIndex].text.substring(0, currentCharIndex)}
+              <span className="w-2 h-5 bg-white/80 animate-pulse ml-1" />
             </div>
+          )}
 
-            <div className="flex items-center gap-2 mt-4 group">
-              <span className="text-blue-400">➜</span> 
-              <span className="text-cyan-400">~</span> 
-              <span className="w-2.5 h-5 bg-white/80 animate-[blink_1s_infinite]" />
+          {/* Final Idle State */}
+          {currentLineIndex === terminalLines.length && (
+            <div className="flex items-center mt-4">
+              <span className="text-emerald-500 mr-3">❯</span>
+              <span className="text-white">_</span>
+              <span className="w-2 h-5 bg-white animate-blink ml-1" />
             </div>
-          </div>
+          )}
         </div>
       </motion.div>
 
@@ -82,15 +88,8 @@ export default function Terminal() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
         }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
+        .animate-blink {
+          animation: blink 1s step-end infinite;
         }
       `}</style>
     </section>
