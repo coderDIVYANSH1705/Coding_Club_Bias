@@ -8,107 +8,54 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// ── Pill badge used in multiple panels ───────────────────────────────────────
+const G = '#00ff88'; // terminal green
+
 const Pill = ({ children }: { children: React.ReactNode }) => (
-  <span
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '6px',
-      padding: '4px 12px',
-      borderRadius: '100px',
-      border: '1px solid rgba(0,229,255,0.25)',
-      background: 'rgba(0,229,255,0.06)',
-      color: '#00E5FF',
-      fontFamily: "'JetBrains Mono', monospace",
-      fontSize: '0.62rem',
-      letterSpacing: '0.18em',
-      textTransform: 'uppercase',
-    }}
-  >
+  <span style={{
+    display: 'inline-flex', alignItems: 'center', gap: 6,
+    padding: '4px 12px', borderRadius: 100,
+    border: `1px solid rgba(0,255,136,0.25)`,
+    background: 'rgba(0,255,136,0.06)',
+    color: G,
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase' as const,
+  }}>
     {children}
   </span>
 );
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
 const Stat = ({ value, label }: { value: string; label: string }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-    <span
-      style={{
-        fontFamily: "'Orbitron', monospace",
-        fontSize: 'clamp(1.6rem, 3vw, 2.4rem)',
-        fontWeight: 900,
-        background: 'linear-gradient(135deg,#fff 30%,#00E5FF)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        lineHeight: 1,
-      }}
-    >
-      {value}
-    </span>
-    <span
-      style={{
-        fontFamily: "'JetBrains Mono', monospace",
-        fontSize: '0.6rem',
-        color: 'rgba(255,255,255,0.35)',
-        letterSpacing: '0.2em',
-        textTransform: 'uppercase',
-      }}
-    >
-      {label}
-    </span>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <span style={{
+      fontFamily: "'Orbitron', monospace",
+      fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 900,
+      background: `linear-gradient(135deg,#fff 30%,${G})`,
+      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+      lineHeight: 1,
+    }}>{value}</span>
+    <span style={{
+      fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem',
+      color: 'rgba(255,255,255,0.3)', letterSpacing: '0.2em', textTransform: 'uppercase' as const,
+    }}>{label}</span>
   </div>
 );
 
-// ── Event card ────────────────────────────────────────────────────────────────
-const EventCard = ({
-  icon,
-  title,
-  date,
-  tag,
-}: {
-  icon: string;
-  title: string;
-  date: string;
-  tag: string;
-}) => (
-  <div
-    style={{
-      padding: '18px 20px',
-      borderRadius: '12px',
-      border: '1px solid rgba(0,229,255,0.12)',
-      background: 'rgba(255,255,255,0.03)',
-      backdropFilter: 'blur(10px)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px',
-      transition: 'border-color 0.2s',
-    }}
+const EventCard = ({ icon, title, date, tag }: { icon: string; title: string; date: string; tag: string }) => (
+  <div style={{
+    padding: '18px 20px', borderRadius: 12,
+    border: '1px solid rgba(0,255,136,0.1)',
+    background: 'rgba(0,0,0,0.4)',
+    backdropFilter: 'blur(10px)',
+    display: 'flex', flexDirection: 'column', gap: 8,
+    transition: 'border-color 0.25s, transform 0.25s',
+  }}
+    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,255,136,0.35)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,255,136,0.1)'; (e.currentTarget as HTMLElement).style.transform = ''; }}
   >
-    <span style={{ fontSize: '1.4rem' }}>{icon}</span>
-    <div
-      style={{
-        fontFamily: "'Orbitron', monospace",
-        fontSize: 'clamp(0.75rem, 1.2vw, 0.9rem)',
-        color: '#fff',
-        fontWeight: 700,
-        lineHeight: 1.3,
-      }}
-    >
-      {title}
-    </div>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-      <span
-        style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: '0.6rem',
-          color: 'rgba(255,255,255,0.35)',
-          letterSpacing: '0.1em',
-        }}
-      >
-        {date}
-      </span>
+    <span style={{ fontSize: '1.3rem' }}>{icon}</span>
+    <div style={{ fontFamily: "'Orbitron', monospace", fontSize: 'clamp(0.72rem,1.2vw,0.88rem)', color: '#fff', fontWeight: 700, lineHeight: 1.3 }}>{title}</div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>{date}</span>
       <Pill>{tag}</Pill>
     </div>
   </div>
@@ -116,16 +63,12 @@ const EventCard = ({
 
 export default function HeroScroller() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Panel refs
-  const panel0Ref = useRef<HTMLDivElement>(null); // intro
-  const panel1Ref = useRef<HTMLDivElement>(null); // events
-  const panel2Ref = useRef<HTMLDivElement>(null); // workshops
-  const panel3Ref = useRef<HTMLDivElement>(null); // final CTA
-
-  // Decorative line ref
-  const lineRef = useRef<HTMLDivElement>(null);
+  const canvasRef    = useRef<HTMLCanvasElement>(null);
+  const panel0Ref    = useRef<HTMLDivElement>(null);
+  const panel1Ref    = useRef<HTMLDivElement>(null);
+  const panel2Ref    = useRef<HTMLDivElement>(null);
+  const panel3Ref    = useRef<HTMLDivElement>(null);
+  const lineRef      = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -133,25 +76,24 @@ export default function HeroScroller() {
     if (!canvas || !context) return;
 
     const frameCount = 240;
-    const currentFrame = (index: number) => `/Hero/${index}.jpg`;
     const images: HTMLImageElement[] = [];
     const sequence = { frame: 1 };
 
     for (let i = 1; i <= frameCount; i++) {
       const img = new Image();
-      img.src = currentFrame(i);
+      img.src = `/Hero/${i}.jpg`;
       images.push(img);
     }
 
     const render = () => {
       const img = images[sequence.frame - 1];
       if (!img || !img.complete) return;
-      canvas.width = window.innerWidth;
+      canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
-      const hRatio = canvas.width / img.width;
+      const hRatio = canvas.width  / img.width;
       const vRatio = canvas.height / img.height;
-      const ratio = Math.max(hRatio, vRatio);
-      const cx = (canvas.width - img.width * ratio) / 2;
+      const ratio  = Math.max(hRatio, vRatio);
+      const cx = (canvas.width  - img.width  * ratio) / 2;
       const cy = (canvas.height - img.height * ratio) / 2;
       context.clearRect(0, 0, canvas.width, canvas.height);
       context.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
@@ -170,37 +112,31 @@ export default function HeroScroller() {
         },
       });
 
-      // Canvas frame scrub
+      // frame scrub
       tl.to(sequence, { frame: frameCount, snap: 'frame', ease: 'none', onUpdate: render, duration: 10 }, 0);
 
-      // ── Panel 0 (Intro): fade out + scale ──────────────────────────────
-      tl.to(panel0Ref.current, { opacity: 0, scale: 0.92, y: -60, duration: 1.5, ease: 'power2.inOut' }, 0);
+      // panel 0 — fade out
+      tl.to(panel0Ref.current, { opacity: 0, scale: 0.93, y: -50, duration: 1.5, ease: 'power2.inOut' }, 0);
 
-      // ── Decorative line grows across screen ────────────────────────────
+      // decorative line
       tl.fromTo(lineRef.current, { scaleX: 0 }, { scaleX: 1, duration: 1, ease: 'power2.out' }, 1.2);
 
-      // ── Panel 1 (Events): slide in from left ───────────────────────────
+      // panel 1 — events, slide from left
       tl.fromTo(panel1Ref.current,
-        { opacity: 0, x: -100, rotateY: 8 },
-        { opacity: 1, x: 0, rotateY: 0, duration: 2, ease: 'power3.out' },
-        1.5
-      );
-      tl.to(panel1Ref.current, { opacity: 0, x: -60, duration: 1.2, ease: 'power2.in' }, 4.2);
+        { opacity: 0, x: -120 },
+        { opacity: 1, x: 0, duration: 2, ease: 'power3.out' }, 1.5);
+      tl.to(panel1Ref.current, { opacity: 0, x: -80, duration: 1.2, ease: 'power2.in' }, 4.2);
 
-      // ── Panel 2 (Workshops): slide in from right ───────────────────────
+      // panel 2 — workshops, slide from right
       tl.fromTo(panel2Ref.current,
-        { opacity: 0, x: 100, rotateY: -8 },
-        { opacity: 1, x: 0, rotateY: 0, duration: 2, ease: 'power3.out' },
-        5.5
-      );
-      tl.to(panel2Ref.current, { opacity: 0, y: 40, duration: 1.2, ease: 'power2.in' }, 7.8);
+        { opacity: 0, x: 120 },
+        { opacity: 1, x: 0, duration: 2, ease: 'power3.out' }, 5.5);
+      tl.to(panel2Ref.current, { opacity: 0, y: 50, duration: 1.2, ease: 'power2.in' }, 7.8);
 
-      // ── Panel 3 (CTA): rises from below ───────────────────────────────
+      // panel 3 — CTA, rise
       tl.fromTo(panel3Ref.current,
         { opacity: 0, y: 80, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 2, ease: 'expo.out' },
-        8.5
-      );
+        { opacity: 1, y: 0, scale: 1, duration: 2, ease: 'expo.out' }, 8.5);
 
     }, containerRef);
 
@@ -210,339 +146,214 @@ export default function HeroScroller() {
     };
   }, []);
 
-  // shared label style
-  const labelStyle: React.CSSProperties = {
+  const labelSt: React.CSSProperties = {
     fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '0.62rem',
-    letterSpacing: '0.28em',
-    textTransform: 'uppercase',
-    color: 'rgba(0,229,255,0.6)',
-    marginBottom: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
+    fontSize: '0.6rem', letterSpacing: '0.26em', textTransform: 'uppercase',
+    color: 'rgba(0,255,136,0.55)', marginBottom: 14,
+    display: 'flex', alignItems: 'center', gap: 8,
   };
-
-  const headingStyle: React.CSSProperties = {
-    fontFamily: "'Orbitron', monospace",
-    fontWeight: 900,
-    lineHeight: 1.05,
-    color: '#fff',
+  const headSt: React.CSSProperties = {
+    fontFamily: "'Orbitron', monospace", fontWeight: 900, lineHeight: 1.05, color: '#fff',
   };
-
-  const bodyStyle: React.CSSProperties = {
+  const bodySt: React.CSSProperties = {
     fontFamily: "'JetBrains Mono', monospace",
-    color: 'rgba(255,255,255,0.45)',
-    lineHeight: 1.8,
-    fontSize: 'clamp(0.72rem, 1.2vw, 0.85rem)',
+    color: 'rgba(255,255,255,0.4)', lineHeight: 1.85,
+    fontSize: 'clamp(0.7rem,1.2vw,0.83rem)',
   };
 
   return (
     <>
-      {/* Google Fonts */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap');
-
-        .panel-absolute {
-          position: absolute;
-          pointer-events: none;
-          will-change: transform, opacity;
-        }
-
-        @keyframes blink {
-          0%,100% { opacity: 1; }
-          50% { opacity: 0; }
-        }
+        .panel-abs { position:absolute; pointer-events:none; will-change:transform,opacity; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
         .cursor { animation: blink 1s steps(1) infinite; }
-
-        @keyframes floatY {
-          0%,100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        .float { animation: floatY 4s ease-in-out infinite; }
-
-        .grid-bg {
-          background-image:
-            linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-          background-size: 60px 60px;
-        }
-
-        .event-card-hover:hover {
-          border-color: rgba(0,229,255,0.35) !important;
-          transform: translateY(-2px);
-        }
+        @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        .float { animation: floatY 3.5s ease-in-out infinite; }
       `}</style>
 
-      <div ref={containerRef} className="relative w-full bg-[#050505]" style={{ height: '700vh' }}>
-        <div className="sticky top-0 w-full h-screen overflow-hidden">
+      <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '700vh', background: '#050505' }}>
+        <div style={{ position: 'sticky', top: 0, width: '100%', height: '100vh', overflow: 'hidden' }}>
 
-          {/* Canvas bg */}
-          <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full z-0" />
+          {/* Canvas */}
+          <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }} />
 
-          {/* Overlay layers */}
-          <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(5,5,5,0.55) 0%, rgba(5,5,5,0.3) 50%, rgba(5,5,5,0.7) 100%)' }} />
-          <div className="absolute inset-0 z-10 pointer-events-none grid-bg" />
+          {/* Dark overlay — no grid */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.75) 100%)' }} />
 
-          {/* Decorative horizontal line (grows on scroll) */}
-          <div
-            ref={lineRef}
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: 0,
-              width: '100%',
-              height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.18), transparent)',
-              transform: 'scaleX(0)',
-              transformOrigin: 'left',
-              zIndex: 15,
-              pointerEvents: 'none',
-            }}
-          />
+          {/* Decorative grow-line */}
+          <div ref={lineRef} style={{
+            position: 'absolute', top: '50%', left: 0, width: '100%', height: 1,
+            background: `linear-gradient(90deg, transparent, rgba(0,255,136,0.2), transparent)`,
+            transform: 'scaleX(0)', transformOrigin: 'left', zIndex: 15, pointerEvents: 'none',
+          }} />
 
-          {/* Corner decorations */}
-          {[
-            { top: 24, left: 24, borderTop: true, borderLeft: true },
-            { top: 24, right: 24, borderTop: true, borderRight: true },
-            { bottom: 24, left: 24, borderBottom: true, borderLeft: true },
-            { bottom: 24, right: 24, borderBottom: true, borderRight: true },
-          ].map((corner, i) => (
-            <div
-              key={i}
-              style={{
-                position: 'absolute',
-                width: 20,
-                height: 20,
-                zIndex: 20,
-                pointerEvents: 'none',
-                borderTop: corner.borderTop ? '1px solid rgba(0,229,255,0.25)' : undefined,
-                borderBottom: corner.borderBottom ? '1px solid rgba(0,229,255,0.25)' : undefined,
-                borderLeft: corner.borderLeft ? '1px solid rgba(0,229,255,0.25)' : undefined,
-                borderRight: corner.borderRight ? '1px solid rgba(0,229,255,0.25)' : undefined,
-                top: corner.top,
-                bottom: corner.bottom,
-                left: corner.left,
-                right: corner.right,
-              }}
-            />
+          {/* Corner brackets */}
+          {([
+            { top:24, left:24,  borderTop:'1px solid rgba(0,255,136,0.2)', borderLeft:'1px solid rgba(0,255,136,0.2)' },
+            { top:24, right:24, borderTop:'1px solid rgba(0,255,136,0.2)', borderRight:'1px solid rgba(0,255,136,0.2)' },
+            { bottom:24, left:24,  borderBottom:'1px solid rgba(0,255,136,0.2)', borderLeft:'1px solid rgba(0,255,136,0.2)' },
+            { bottom:24, right:24, borderBottom:'1px solid rgba(0,255,136,0.2)', borderRight:'1px solid rgba(0,255,136,0.2)' },
+          ] as React.CSSProperties[]).map((s, i) => (
+            <div key={i} style={{ position:'absolute', width:20, height:20, zIndex:20, pointerEvents:'none', ...s }} />
           ))}
 
-          {/* Scroll progress indicator */}
-          <div style={{ position: 'absolute', right: 28, top: '50%', transform: 'translateY(-50%)', zIndex: 20, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', pointerEvents: 'none' }}>
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} style={{ width: 3, height: i === 0 ? 20 : 6, borderRadius: 10, background: i === 0 ? '#00E5FF' : 'rgba(255,255,255,0.2)', boxShadow: i === 0 ? '0 0 8px #00E5FF' : 'none' }} />
+          {/* Side dots progress */}
+          <div style={{ position:'absolute', right:28, top:'50%', transform:'translateY(-50%)', zIndex:20, display:'flex', flexDirection:'column', gap:7, alignItems:'center', pointerEvents:'none' }}>
+            {[1,0,0,0].map((active,i) => (
+              <div key={i} style={{ width:3, height: active ? 20:6, borderRadius:10, background: active ? G : 'rgba(255,255,255,0.18)', boxShadow: active ? `0 0 8px ${G}`:'' }} />
             ))}
           </div>
 
-          {/* ── PANEL 0 · INTRO ─────────────────────────────────────────────── */}
-          <div
-            ref={panel0Ref}
-            className="panel-absolute"
-            style={{ inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 20, textAlign: 'center', padding: '0 24px' }}
-          >
-            {/* Top label */}
-            <div style={{ ...labelStyle, justifyContent: 'center', marginBottom: 20 }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00E5FF', boxShadow: '0 0 8px #00E5FF', display: 'inline-block' }} />
+          {/* ── PANEL 0 · INTRO ───────────────────────────────────────── */}
+          <div ref={panel0Ref} className="panel-abs" style={{ inset:0, zIndex:20, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'0 24px' }}>
+            <div style={{ ...labelSt, justifyContent:'center', marginBottom:20 }}>
+              <span style={{ width:5, height:5, borderRadius:'50%', background:G, boxShadow:`0 0 8px ${G}`, display:'inline-block' }} />
               Birla Institute of Applied Sciences
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#00E5FF', boxShadow: '0 0 8px #00E5FF', display: 'inline-block' }} />
+              <span style={{ width:5, height:5, borderRadius:'50%', background:G, boxShadow:`0 0 8px ${G}`, display:'inline-block' }} />
             </div>
 
-            {/* Main heading */}
-            <h1
-              style={{
-                ...headingStyle,
-                fontSize: 'clamp(3.5rem, 12vw, 9rem)',
-                letterSpacing: '-0.02em',
-                marginBottom: 8,
-                background: 'linear-gradient(170deg, #ffffff 40%, rgba(0,229,255,0.6) 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              CODING
-              <br />
-              CLUB
+            <h1 style={{
+              ...headSt,
+              fontSize: 'clamp(3.5rem,12vw,9rem)',
+              letterSpacing: '-0.02em', marginBottom: 8,
+              background: `linear-gradient(170deg,#ffffff 40%,${G} 100%)`,
+              WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
+            }}>
+              CODING<br />CLUB
             </h1>
 
-            {/* Typewriter line */}
-            <div style={{ ...bodyStyle, marginTop: 16, marginBottom: 32, display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'center' }}>
-              <span style={{ color: '#00E5FF', opacity: 0.7 }}>$</span>
-              <span style={{ marginLeft: 8 }}>scroll to initialize_sequence</span>
-              <span className="cursor" style={{ width: 2, height: '1em', background: '#00E5FF', display: 'inline-block', marginLeft: 3 }} />
+            <div style={{ ...bodySt, marginTop:16, marginBottom:32, display:'flex', alignItems:'center', gap:4, justifyContent:'center' }}>
+              <span style={{ color:G, opacity:0.7 }}>$</span>
+              <span style={{ marginLeft:6 }}>scroll to initialize_sequence</span>
+              <span className="cursor" style={{ width:2, height:'1em', background:G, display:'inline-block', marginLeft:2 }} />
             </div>
 
-            {/* Stat strip */}
-            <div style={{ display: 'flex', gap: 'clamp(24px, 5vw, 56px)', justifyContent: 'center', flexWrap: 'wrap', padding: '20px 32px', borderRadius: 16, border: '1px solid rgba(0,229,255,0.1)', background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(12px)' }}>
+            {/* Stats */}
+            <div style={{ display:'flex', gap:'clamp(20px,4vw,48px)', justifyContent:'center', flexWrap:'wrap', padding:'18px 28px', borderRadius:14, border:`1px solid rgba(0,255,136,0.12)`, background:'rgba(0,0,0,0.45)', backdropFilter:'blur(14px)' }}>
               <Stat value="200+" label="Members" />
-              <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
+              <div style={{ width:1, background:'rgba(255,255,255,0.07)', alignSelf:'stretch' }} />
               <Stat value="48" label="Events" />
-              <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
+              <div style={{ width:1, background:'rgba(255,255,255,0.07)', alignSelf:'stretch' }} />
               <Stat value="12" label="Projects" />
-              <div style={{ width: 1, background: 'rgba(255,255,255,0.08)', alignSelf: 'stretch' }} />
+              <div style={{ width:1, background:'rgba(255,255,255,0.07)', alignSelf:'stretch' }} />
               <Stat value="5★" label="Rated" />
             </div>
 
-            {/* Scroll hint */}
-            <div style={{ marginTop: 40, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, opacity: 0.4 }}>
+            {/* Scroll mouse */}
+            <div style={{ marginTop:38, display:'flex', flexDirection:'column', alignItems:'center', gap:7, opacity:0.35 }}>
               <svg width="20" height="32" viewBox="0 0 20 32" fill="none">
-                <rect x="1" y="1" width="18" height="30" rx="9" stroke="white" strokeWidth="1.5" />
-                <rect className="float" x="8.5" y="6" width="3" height="7" rx="1.5" fill="white" />
+                <rect x="1" y="1" width="18" height="30" rx="9" stroke="white" strokeWidth="1.5"/>
+                <rect className="float" x="8.5" y="6" width="3" height="7" rx="1.5" fill="white"/>
               </svg>
-              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', letterSpacing: '0.25em', color: 'white' }}>SCROLL</span>
+              <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.52rem', letterSpacing:'0.28em', color:'white' }}>SCROLL</span>
             </div>
           </div>
 
-          {/* ── PANEL 1 · UPCOMING EVENTS ────────────────────────────────────── */}
-          <div
-            ref={panel1Ref}
-            className="panel-absolute"
-            style={{ inset: 0, display: 'flex', alignItems: 'center', zIndex: 20, padding: 'clamp(24px,5vw,80px)', opacity: 0 }}
-          >
-            <div style={{ maxWidth: 560, width: '100%' }}>
-              <div style={labelStyle}>
-                <span>// 01</span>
-                <span>Upcoming Events</span>
-              </div>
-              <h2 style={{ ...headingStyle, fontSize: 'clamp(2rem, 5vw, 3.8rem)', marginBottom: 8 }}>
+          {/* ── PANEL 1 · EVENTS ──────────────────────────────────────── */}
+          <div ref={panel1Ref} className="panel-abs" style={{ inset:0, zIndex:20, display:'flex', alignItems:'center', padding:'clamp(24px,5vw,80px)', opacity:0 }}>
+            <div style={{ maxWidth:560, width:'100%' }}>
+              <div style={labelSt}><span>// 01</span><span>Upcoming Events</span></div>
+              <h2 style={{ ...headSt, fontSize:'clamp(2rem,5vw,3.6rem)', marginBottom:10 }}>
                 What's<br />
-                <span style={{ WebkitTextFillColor: 'transparent', background: 'linear-gradient(90deg,#00E5FF,#fff)', WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>
+                <span style={{ background:`linear-gradient(90deg,${G},#fff)`, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
                   Dropping Next.
                 </span>
               </h2>
-              <p style={{ ...bodyStyle, marginBottom: 28, maxWidth: 400 }}>
+              <p style={{ ...bodySt, marginBottom:26, maxWidth:400 }}>
                 Hackathons, competitive coding sprints, open-source jams — the calendar never sleeps. Neither should you.
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
-                <EventCard icon="⚡" title="48-hr Hackathon" date="Mar 15 — Mar 17" tag="Hackathon" />
-                <EventCard icon="🏆" title="DSA Championship" date="Apr 02" tag="Competitive" />
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:12 }}>
+                <EventCard icon="⚡" title="48-hr Hackathon"    date="Mar 15 — Mar 17" tag="Hackathon" />
+                <EventCard icon="🏆" title="DSA Championship"   date="Apr 02"          tag="Competitive" />
                 <EventCard icon="🌐" title="Open Source Sprint" date="Apr 18 — Apr 20" tag="Open Source" />
-                <EventCard icon="🤖" title="AI/ML Buildathon" date="May 05" tag="AI · ML" />
+                <EventCard icon="🤖" title="AI/ML Buildathon"   date="May 05"          tag="AI · ML" />
               </div>
             </div>
           </div>
 
-          {/* ── PANEL 2 · WORKSHOPS ──────────────────────────────────────────── */}
-          <div
-            ref={panel2Ref}
-            className="panel-absolute"
-            style={{ inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', zIndex: 20, padding: 'clamp(24px,5vw,80px)', opacity: 0 }}
-          >
-            <div style={{ maxWidth: 520, width: '100%', textAlign: 'right' }}>
-              <div style={{ ...labelStyle, justifyContent: 'flex-end' }}>
-                <span>Workshops & Skills</span>
-                <span>02 //</span>
-              </div>
-              <h2 style={{ ...headingStyle, fontSize: 'clamp(2rem, 5vw, 3.8rem)', marginBottom: 8 }}>
+          {/* ── PANEL 2 · WORKSHOPS ───────────────────────────────────── */}
+          <div ref={panel2Ref} className="panel-abs" style={{ inset:0, zIndex:20, display:'flex', alignItems:'center', justifyContent:'flex-end', padding:'clamp(24px,5vw,80px)', opacity:0 }}>
+            <div style={{ maxWidth:520, width:'100%', textAlign:'right' }}>
+              <div style={{ ...labelSt, justifyContent:'flex-end' }}><span>Workshops & Skills</span><span>02 //</span></div>
+              <h2 style={{ ...headSt, fontSize:'clamp(2rem,5vw,3.6rem)', marginBottom:10 }}>
                 Learn.<br />
-                <span style={{ WebkitTextFillColor: 'transparent', background: 'linear-gradient(90deg,#fff,#00E5FF)', WebkitBackgroundClip: 'text', backgroundClip: 'text' }}>
+                <span style={{ background:`linear-gradient(90deg,#fff,${G})`, WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
                   Build. Ship.
                 </span>
               </h2>
-              <p style={{ ...bodyStyle, marginBottom: 28, marginLeft: 'auto', maxWidth: 400, textAlign: 'right' }}>
-                Hands-on sessions with industry engineers. From Docker & Kubernetes to Full-Stack and System Design — no fluff, all depth.
+              <p style={{ ...bodySt, marginBottom:26, marginLeft:'auto', maxWidth:400, textAlign:'right' }}>
+                Hands-on sessions with industry engineers. Docker, Kubernetes, Full-Stack, System Design — no fluff, all depth.
               </p>
-
-              {/* Workshop list */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
                 {[
-                  { icon: '🐳', name: 'Docker & DevOps Bootcamp', level: 'Intermediate' },
-                  { icon: '⚛️', name: 'React + Next.js Deep Dive', level: 'Beginner' },
-                  { icon: '🔐', name: 'Cybersecurity & CTF Prep', level: 'Advanced' },
-                  { icon: '🧠', name: 'LLM Engineering Workshop', level: 'Advanced' },
+                  { icon:'🐳', name:'Docker & DevOps Bootcamp',  level:'Intermediate' },
+                  { icon:'⚛️', name:'React + Next.js Deep Dive',  level:'Beginner' },
+                  { icon:'🔐', name:'Cybersecurity & CTF Prep',   level:'Advanced' },
+                  { icon:'🧠', name:'LLM Engineering Workshop',   level:'Advanced' },
                 ].map(w => (
-                  <div key={w.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 12, padding: '12px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(8px)' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.82rem', color: '#fff', fontWeight: 600 }}>{w.name}</div>
-                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem', color: 'rgba(0,229,255,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase', marginTop: 2 }}>{w.level}</div>
+                  <div key={w.name} style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', gap:12, padding:'12px 16px', borderRadius:10, border:'1px solid rgba(0,255,136,0.08)', background:'rgba(0,0,0,0.4)', backdropFilter:'blur(8px)' }}>
+                    <div style={{ textAlign:'right' }}>
+                      <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.8rem', color:'#fff', fontWeight:600 }}>{w.name}</div>
+                      <div style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:'0.56rem', color:`rgba(0,255,136,0.45)`, letterSpacing:'0.15em', textTransform:'uppercase', marginTop:2 }}>{w.level}</div>
                     </div>
-                    <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>{w.icon}</span>
+                    <span style={{ fontSize:'1.25rem', flexShrink:0 }}>{w.icon}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* ── PANEL 3 · FINAL CTA ──────────────────────────────────────────── */}
-          <div
-            ref={panel3Ref}
-            className="panel-absolute"
-            style={{ inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 20, textAlign: 'center', padding: '0 24px', opacity: 0 }}
-          >
-            {/* Glow ring */}
-            <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          {/* ── PANEL 3 · CTA ─────────────────────────────────────────── */}
+          <div ref={panel3Ref} className="panel-abs" style={{ inset:0, zIndex:20, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:'0 24px', opacity:0 }}>
+            {/* glow blob */}
+            <div style={{ position:'absolute', width:420, height:420, borderRadius:'50%', background:`radial-gradient(circle,rgba(0,255,136,0.06) 0%,transparent 70%)`, pointerEvents:'none' }} />
 
-            <div style={{ ...labelStyle, justifyContent: 'center', marginBottom: 20 }}>
-              <span>Ready to join?</span>
-            </div>
+            <div style={{ ...labelSt, justifyContent:'center', marginBottom:20 }}><span>// Ready to join?</span></div>
 
-            <h2
-              style={{
-                ...headingStyle,
-                fontSize: 'clamp(2.8rem, 8vw, 6.5rem)',
-                marginBottom: 16,
-                background: 'linear-gradient(135deg, #ffffff 0%, #00E5FF 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                letterSpacing: '-0.02em',
-              }}
-            >
+            <h2 style={{
+              ...headSt,
+              fontSize:'clamp(2.8rem,8vw,6rem)', marginBottom:16,
+              background:`linear-gradient(135deg,#ffffff 0%,${G} 100%)`,
+              WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
+              letterSpacing:'-0.02em',
+            }}>
               INNOVATE.<br />DEPLOY.<br />SCALE.
             </h2>
 
-            <p style={{ ...bodyStyle, maxWidth: 420, marginBottom: 36 }}>
-              Push your code to the limits. Whether containerizing environments or training ML models — the terminal is yours. Join the revolution.
+            <p style={{ ...bodySt, maxWidth:400, marginBottom:36 }}>
+              Push your code to the limits. Whether containerizing environments or training ML models — the terminal is yours.
             </p>
 
-            {/* CTA buttons */}
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <button
-                style={{
-                  padding: '14px 32px',
-                  borderRadius: 8,
-                  background: '#00E5FF',
-                  color: '#050505',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.1em',
-                  border: 'none',
-                  cursor: 'pointer',
-                  boxShadow: '0 0 24px rgba(0,229,255,0.4)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  pointerEvents: 'auto',
-                }}
-                onMouseEnter={e => { (e.target as HTMLElement).style.transform = 'translateY(-2px)'; (e.target as HTMLElement).style.boxShadow = '0 0 36px rgba(0,229,255,0.6)'; }}
-                onMouseLeave={e => { (e.target as HTMLElement).style.transform = ''; (e.target as HTMLElement).style.boxShadow = '0 0 24px rgba(0,229,255,0.4)'; }}
+            <div style={{ display:'flex', gap:14, flexWrap:'wrap', justifyContent:'center' }}>
+              <button style={{
+                padding:'13px 30px', borderRadius:8, background:G,
+                color:'#050505', fontFamily:"'JetBrains Mono',monospace",
+                fontSize:'0.78rem', fontWeight:700, letterSpacing:'0.1em',
+                border:'none', cursor:'pointer',
+                boxShadow:`0 0 22px rgba(0,255,136,0.4)`,
+                transition:'transform 0.2s, box-shadow 0.2s', pointerEvents:'auto',
+              }}
+                onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.transform='translateY(-2px)';(e.currentTarget as HTMLElement).style.boxShadow=`0 0 36px rgba(0,255,136,0.6)`;}}
+                onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform='';(e.currentTarget as HTMLElement).style.boxShadow=`0 0 22px rgba(0,255,136,0.4)`;}}
               >
                 &gt;_ JOIN THE CLUB
               </button>
-              <button
-                style={{
-                  padding: '13px 32px',
-                  borderRadius: 8,
-                  background: 'transparent',
-                  color: 'rgba(255,255,255,0.7)',
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                  letterSpacing: '0.1em',
-                  border: '1px solid rgba(0,229,255,0.25)',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  pointerEvents: 'auto',
-                }}
-                onMouseEnter={e => { const t = e.target as HTMLElement; t.style.borderColor = 'rgba(0,229,255,0.6)'; t.style.color = '#00E5FF'; }}
-                onMouseLeave={e => { const t = e.target as HTMLElement; t.style.borderColor = 'rgba(0,229,255,0.25)'; t.style.color = 'rgba(255,255,255,0.7)'; }}
+              <button style={{
+                padding:'12px 30px', borderRadius:8, background:'transparent',
+                color:'rgba(255,255,255,0.65)', fontFamily:"'JetBrains Mono',monospace",
+                fontSize:'0.78rem', fontWeight:500, letterSpacing:'0.1em',
+                border:'1px solid rgba(0,255,136,0.22)', cursor:'pointer',
+                transition:'all 0.2s', pointerEvents:'auto',
+              }}
+                onMouseEnter={e=>{const t=e.currentTarget as HTMLElement;t.style.borderColor=`rgba(0,255,136,0.55)`;t.style.color=G;}}
+                onMouseLeave={e=>{const t=e.currentTarget as HTMLElement;t.style.borderColor='rgba(0,255,136,0.22)';t.style.color='rgba(255,255,255,0.65)';}}
               >
                 VIEW EVENTS
               </button>
             </div>
 
-            {/* Bottom tag line */}
-            <div style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.25em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+            <div style={{ position:'absolute', bottom:28, left:'50%', transform:'translateX(-50%)', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.55rem', color:'rgba(255,255,255,0.18)', letterSpacing:'0.25em', textTransform:'uppercase', whiteSpace:'nowrap' }}>
               Birla Institute of Applied Sciences · Coding Club © 2025
             </div>
           </div>
