@@ -20,9 +20,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ~/manage_events
           </Link>
           {/* Room to add more later */}
-          <Link href="/admin/members" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200 text-gray-500 pointer-events-none">
-            ~/manage_users (coming soon)
-          </Link>
+        <Link href="/admin/members" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200">
+  ~/manage_users
+</Link>
           <Link href="/admin/settings" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200 text-gray-500 pointer-events-none">
             ~/system_config (coming soon)
           </Link>
