@@ -5,6 +5,7 @@ import Terminal from './Components/Terminal';
 import AboutClub from './Components/About';
 import ClubTechStack from './Components/TechnologyArsenal';
 import TechCentre from './Components/TechCentre';
+import ScrollSequence from './Components/TechCentre';
 export default function Page() {
   return (
     <main>
@@ -13,7 +14,7 @@ export default function Page() {
       <Terminal />
       <AboutClub />
       <ClubTechStack />
-      <TechCentre />
+      <ScrollSequence />
     </main>
   );
 }
