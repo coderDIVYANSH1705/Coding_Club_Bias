@@ -85,7 +85,7 @@ const CodingClubHeader = () => {
               
               {/* ADMIN LOGIN LINK ADDED HERE */}
               <MagneticLink href="/admin/login">
-                <span className="text-green-400 font-bold">_ROOT</span>
+                <span className="text-green-400 font-bold">_ADMIN</span>
               </MagneticLink>
             </ul>
 
