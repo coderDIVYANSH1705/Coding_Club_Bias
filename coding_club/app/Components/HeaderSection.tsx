@@ -2,6 +2,7 @@
 import { useState, useRef, MouseEvent } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import GlassSurface from "./GlassSurface";
+// Optional: If you want soft-routing instead of full page reloads, import Link from 'next/link'
 
 function scrollToId(id: string) {
   const el = document.getElementById(id);
@@ -36,7 +37,7 @@ const CodingClubHeader = () => {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className="fixed top-6 left-1/2 -translate-x-1/2 z-50"
+        className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-auto"
       >
         <GlassSurface
           width="auto"
@@ -81,6 +82,11 @@ const CodingClubHeader = () => {
                   {item.label}
                 </MagneticLink>
               ))}
+              
+              {/* ADMIN LOGIN LINK ADDED HERE */}
+              <MagneticLink href="/admin/login">
+                <span className="text-green-400 font-bold">_ROOT</span>
+              </MagneticLink>
             </ul>
 
             {/* Join CTA */}
@@ -102,9 +108,10 @@ const CodingClubHeader = () => {
               xChannel="R"
               yChannel="G"
               mixBlendMode="screen"
-              className="cursor-pointer hidden md:block"
+              className="cursor-pointer hidden md:block ml-2"
             >
               <motion.button
+                onClick={() => scrollToId('join')} // Assuming you have a join section
                 whileTap={{ scale: 0.95 }}
                 className="px-5 py-2 text-sm font-medium text-green-400 whitespace-nowrap font-mono"
               >
@@ -178,7 +185,7 @@ const CodingClubHeader = () => {
                   >
                     <a
                       href={item.scrollTo ? undefined : item.href}
-                      onClick={() => handleNavClick(item)}
+                      onClick={item.scrollTo ? () => handleNavClick(item) : undefined}
                       className="block text-white/80 hover:text-green-400 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-white/5 cursor-pointer font-mono text-sm"
                     >
                       <span className="text-green-400 mr-2 opacity-60">{">"}</span>
@@ -187,10 +194,26 @@ const CodingClubHeader = () => {
                   </motion.li>
                 ))}
 
+                {/* ADMIN LOGIN FOR MOBILE */}
                 <motion.li
                   initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: NAV_ITEMS.length * 0.1 }}
+                >
+                  <a
+                    href="/admin/login"
+                    className="block text-green-400 font-bold hover:text-green-300 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-white/5 cursor-pointer font-mono text-sm"
+                  >
+                    <span className="text-green-400 mr-2 opacity-60">{">"}</span>
+                    _ROOT
+                  </a>
+                </motion.li>
+
+                {/* Join CTA Mobile */}
+                <motion.li
+                  initial={{ x: -50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: (NAV_ITEMS.length + 1) * 0.1 }}
                   className="pt-2"
                 >
                   <GlassSurface
@@ -214,7 +237,10 @@ const CodingClubHeader = () => {
                     className="cursor-pointer"
                   >
                     <button
-                      onClick={() => setIsMobileMenuOpen(false)}
+                      onClick={() => {
+                        scrollToId('join');
+                        setIsMobileMenuOpen(false);
+                      }}
                       className="w-full text-green-400 font-medium text-sm py-3 font-mono"
                     >
                       &gt;_ Join Us

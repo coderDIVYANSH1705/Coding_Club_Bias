@@ -11,7 +11,7 @@ import JoinClubForm from './Components/JoinClub';
 export default function Page() {
   return (
     <main>
-      <HeaderSection />
+        <CodingClubHeader />
       <HeroScroller />
       <Terminal />
       <AboutClub />
