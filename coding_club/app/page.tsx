@@ -6,6 +6,7 @@ import AboutClub from './Components/About';
 import ClubTechStack from './Components/TechnologyArsenal';
 import TechCentre from './Components/TechCentre';
 import ScrollSequence from './Components/TechCentre';
+import EventGallery from './Components/EventGallery';
 export default function Page() {
   return (
     <main>
@@ -14,7 +15,7 @@ export default function Page() {
       <Terminal />
       <AboutClub />
       <ClubTechStack />
-      <ScrollSequence />
+      <EventGallery />
     </main>
   );
 }
