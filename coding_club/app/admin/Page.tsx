@@ -38,10 +38,10 @@ export default function AdminDashboard() {
               <span>Create New Event</span>
               <span className="text-[#00FF41] group-hover:translate-x-1 transition-transform">-&gt;</span>
             </Link>
-            <button className="p-4 bg-black border border-[#00FF41]/30 opacity-50 cursor-not-allowed text-left flex justify-between items-center">
-              <span>Manage Users (Locked)</span>
-              <span>[X]</span>
-            </button>
+           <Link href="/admin/members" className="group p-4 bg-black border border-[#00FF41]/30 hover:bg-[#00FF41]/10 hover:border-[#00FF41] transition-all flex justify-between items-center">
+  <span>Review Applications</span>
+  <span className="text-[#00FF41] group-hover:translate-x-1 transition-transform">-&gt;</span>
+</Link>
           </div>
         </section>
 
