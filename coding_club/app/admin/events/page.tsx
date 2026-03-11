@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function ManageEvents() {
   const [loading, setLoading] = useState(false);
@@ -7,12 +8,47 @@ export default function ManageEvents() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // Here you would handle the actual FormData and send it to your API/Database
-    // const formData = new FormData(e.currentTarget);
-    setTimeout(() => {
-      setLoading(false);
+
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get('title') as string;
+    const date = formData.get('date') as string;
+    const description = formData.get('description') as string;
+    const file = formData.get('image') as File;
+
+    try {
+      // 1. Upload the Image to the 'event-images' bucket
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('event-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Get the public URL of the uploaded image
+      const { data: { publicUrl } } = supabase.storage
+        .from('event-images')
+        .getPublicUrl(fileName);
+
+      // 3. Save the text data + image URL into the 'events' database table
+      const { error: dbError } = await supabase
+        .from('events')
+        .insert([
+          { title, event_date: date, description, image_url: publicUrl }
+        ]);
+
+      if (dbError) throw dbError;
+
       alert('Event successfully synchronized to the mainframe.');
-    }, 1000);
+      (e.target as HTMLFormElement).reset(); // Clear the form
+
+    } catch (error: any) {
+      console.error(error);
+      alert(`System Error: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,9 +63,9 @@ export default function ManageEvents() {
           <label className="block text-sm uppercase tracking-wider text-[#00FF41]">Event Title_</label>
           <input 
             type="text" 
+            name="title" // Added name
             required
             className="w-full bg-transparent border border-[#00FF41]/50 p-3 text-white focus:outline-none focus:border-[#00FF41] focus:ring-1 focus:ring-[#00FF41] transition-all"
-            placeholder="e.g., Hackathon 2026"
           />
         </div>
 
@@ -38,6 +74,7 @@ export default function ManageEvents() {
             <label className="block text-sm uppercase tracking-wider text-[#00FF41]">Date_</label>
             <input 
               type="date" 
+              name="date" // Added name
               required
               className="w-full bg-transparent border border-[#00FF41]/50 p-3 text-white focus:outline-none focus:border-[#00FF41] transition-all color-scheme-dark"
             />
@@ -47,6 +84,7 @@ export default function ManageEvents() {
             <label className="block text-sm uppercase tracking-wider text-[#00FF41]">Event Image_</label>
             <input 
               type="file" 
+              name="image" // Added name
               accept="image/*"
               required
               className="w-full bg-transparent border border-[#00FF41]/50 p-2.5 text-sm text-[#00FF41]/70 file:mr-4 file:py-1 file:px-4 file:rounded-none file:border-0 file:text-sm file:font-semibold file:bg-[#00FF41] file:text-black hover:file:bg-[#00cc33] cursor-pointer"
@@ -58,9 +96,9 @@ export default function ManageEvents() {
           <label className="block text-sm uppercase tracking-wider text-[#00FF41]">Description_</label>
           <textarea 
             rows={4} 
+            name="description" // Added name
             required
             className="w-full bg-transparent border border-[#00FF41]/50 p-3 text-white focus:outline-none focus:border-[#00FF41] transition-all"
-            placeholder="Enter event details, rules, or wrap-up summary..."
           />
         </div>
 

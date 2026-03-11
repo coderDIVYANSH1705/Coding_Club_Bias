@@ -5,9 +5,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**', 
+        hostname: 'images.unsplash.com', 
+      },
+      {
+        protocol: 'https',
+        hostname: 'edzrvyyfxltrdmwjdflc.supabase.co', // <-- Replace with your actual Supabase URL host
       },
     ],
   },
