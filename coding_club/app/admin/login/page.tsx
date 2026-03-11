@@ -3,32 +3,39 @@ import { redirect } from 'next/navigation';
 
 export default function AdminLogin() {
   
-  // This is a Next.js Server Action. It runs securely on the server.
+  // This Server Action runs securely on the backend
   async function handleLogin(formData: FormData) {
     'use server';
     
     const id = formData.get('admin_id');
     const password = formData.get('admin_pass');
 
-    // HARDCODED CREDENTIALS (Change these to whatever you want!)
-    const CORRECT_ID = 'admin';
-    const CORRECT_PASS = 'root123';
+    // Securely retrieve credentials from your .env.local vault
+    const CORRECT_ID = process.env.ADMIN_ID;
+    const CORRECT_PASS = process.env.ADMIN_PASS;
 
+    // Failsafe: Prevent login if environment variables are missing
+    if (!CORRECT_ID || !CORRECT_PASS) {
+      console.error("CRITICAL ERR: Admin credentials missing from environment variables.");
+      redirect('/admin/login?error=server_config');
+    }
+
+    // Verify credentials
     if (id === CORRECT_ID && password === CORRECT_PASS) {
-      // Set a secure cookie that lasts for 24 hours
+      // Grant clearance: Set the secure auth cookie
       const cookieStore = await cookies();
       cookieStore.set('admin_auth', 'authenticated', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24, // 1 day
+        secure: process.env.NODE_ENV === 'production', // Only requires HTTPS in production
+        maxAge: 60 * 60 * 24, // Cookie expires in 1 day
         path: '/',
       });
       
-      // Redirect to the dashboard
+      // Redirect to the mainframe
       redirect('/admin');
     } else {
-      // If wrong, redirect back to login with an error flag
-      redirect('/admin/login?error=true');
+      // Access denied
+      redirect('/admin/login?error=invalid_credentials');
     }
   }
 
