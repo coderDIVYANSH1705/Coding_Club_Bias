@@ -26,6 +26,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/settings" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200 text-gray-500 pointer-events-none">
             ~/system_config (coming soon)
           </Link>
+          <Link href="/admin/leaders" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200">
+  ~/manage_leaders
+</Link>
         </nav>
       </aside>
 
