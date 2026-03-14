@@ -9,6 +9,7 @@ import ScrollSequence from '../Components/TechCentre';
 import EventGallery from '../Components/EventGallery';
 import JoinClubForm from '../Components/JoinClub';
 import LeadershipSection from '@/Components/leadership';
+import Footer from '@/Components/footer';
 export default function Page() {
   return (
     <main>
@@ -20,6 +21,7 @@ export default function Page() {
       <EventGallery />
       <JoinClubForm />
       <LeadershipSection />
+      <Footer />
     </main>
   );
 }
