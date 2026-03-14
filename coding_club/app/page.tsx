@@ -11,12 +11,13 @@ import JoinClubForm from '../Components/JoinClub';
 import LeadershipSection from '@/Components/leadership';
 import AboutSection from '@/Components/AboutTheClub';
 import Footer from '@/Components/footer';
+import AboutIDE from '@/Components/AboutTheClub';
 export default function Page() {
   return (
     <main>
       <HeaderSection />
       <HeroScroller />
-      <AboutSection />
+      <AboutIDE />
       <Terminal />
       <About3D />
       <ClubTechStack />
