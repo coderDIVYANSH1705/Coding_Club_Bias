@@ -9,12 +9,14 @@ import ScrollSequence from '../Components/TechCentre';
 import EventGallery from '../Components/EventGallery';
 import JoinClubForm from '../Components/JoinClub';
 import LeadershipSection from '@/Components/leadership';
+import AboutSection from '@/Components/AboutTheClub';
 import Footer from '@/Components/footer';
 export default function Page() {
   return (
     <main>
       <HeaderSection />
       <HeroScroller />
+      <AboutSection />
       <Terminal />
       <About3D />
       <ClubTechStack />
