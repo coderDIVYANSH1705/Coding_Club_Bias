@@ -304,15 +304,8 @@ export default function AboutBento() {
                   Sharpening algorithms, optimizing runtimes, and preparing the next generation of competitive engineers.
                 </div>
               </div>
-              <a
-                href="#join"
-                className="group/btn relative mt-5 inline-flex items-center gap-2 self-start overflow-hidden border border-[#00FF41] px-5 py-2.5
-                  text-[10px] uppercase tracking-[0.2em] text-[#00FF41]
-                  before:absolute before:inset-0 before:bg-[#00FF41] before:-translate-x-full hover:before:translate-x-0 before:transition-transform before:duration-300"
-              >
-                <span className="relative z-10 group-hover/btn:text-black transition-colors duration-300">Apply for Access</span>
-                <span className="relative z-10 group-hover/btn:text-black group-hover/btn:translate-x-1 transition-all duration-300">→</span>
-              </a>
+             
+             
             </GlowCard>
           </motion.div>
 
