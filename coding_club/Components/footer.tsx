@@ -71,23 +71,12 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li>
-                <a href="#" className="group flex items-center gap-2 hover:text-white transition-colors duration-300">
+                <a href="https://github.com/biascodingclub" className="group flex items-center gap-2 hover:text-white transition-colors duration-300">
                   <span className="text-[#00FF41] opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">#</span> 
                   GitHub
                 </a>
               </li>
-              <li>
-                <a href="#" className="group flex items-center gap-2 hover:text-white transition-colors duration-300">
-                  <span className="text-[#00FF41] opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">#</span> 
-                  Discord_Server
-                </a>
-              </li>
-              <li>
-                <a href="#" className="group flex items-center gap-2 hover:text-white transition-colors duration-300">
-                  <span className="text-[#00FF41] opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">#</span> 
-                  LinkedIn
-                </a>
-              </li>
+            
             </ul>
           </div>
 
