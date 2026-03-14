@@ -11,12 +11,13 @@ import JoinClubForm from '../Components/JoinClub';
 import LeadershipSection from '@/Components/leadership';
 import RadarAbout from '@/Components/AboutTheClub';
 import Footer from '@/Components/footer';
+import AboutBento from '@/Components/AboutTheClub';
 export default function Page() {
   return (
     <main>
       <HeaderSection />
       <HeroScroller />
-      <RadarAbout />
+      <AboutBento />
       <Terminal />
       <About3D />
       <ClubTechStack />

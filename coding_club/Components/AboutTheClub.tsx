@@ -1,101 +1,134 @@
 "use client";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
-const SECTORS = [
-  { id: "S-01", label: "ALGORITHMS", angle: 45, detail: "Mastering O(log n) efficiency." },
-  { id: "S-02", label: "FULLSTACK", angle: 135, detail: "Deploying high-availability apps." },
-  { id: "S-03", label: "NEURAL NET", angle: 225, detail: "Exploring deep learning models." },
-  { id: "S-04", label: "CYBERSEC", angle: 315, detail: "Securing the BIAS mainframe." },
-];
+export default function AboutBento() {
+  // A typing effect for the "Terminal" card to keep the hacker vibe alive
+  const [terminalText, setTerminalText] = useState("");
+  const fullText = "Initializing BIAS club protocols...\nLoading developer modules...\nStatus: ACTIVE\nObjective: Dominate the tech landscape.";
 
-export default function RadarAbout() {
-  const containerRef = useRef(null);
-  const [rotation, setRotation] = useState(0);
-
-  // Sync rotation with a simple animation loop
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRotation((prev) => (prev + 1) % 360);
-    }, 20);
-    return () => clearInterval(interval);
+    let i = 0;
+    const typingInterval = setInterval(() => {
+      if (i < fullText.length) {
+        setTerminalText(fullText.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 40);
+    return () => clearInterval(typingInterval);
   }, []);
 
+  // Smooth staggered animation variants
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 20 } }
+  };
+
   return (
-    <section 
-      ref={containerRef}
-      id="about" 
-      className="relative min-h-screen bg-black flex items-center justify-center overflow-hidden py-24 font-mono"
-    >
-      {/* Background Radar Rings */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-        <div className="w-[300px] h-[300px] md:w-[600px] md:h-[600px] border border-[#00FF41] rounded-full"></div>
-        <div className="absolute w-[200px] h-[200px] md:w-[400px] md:h-[400px] border border-[#00FF41]/60 rounded-full"></div>
-        <div className="absolute w-[100px] h-[100px] md:w-[200px] md:h-[200px] border border-[#00FF41]/40 rounded-full"></div>
-        
-        {/* Horizontal & Vertical Crosshairs */}
-        <div className="absolute w-full h-[1px] bg-[#00FF41]/30"></div>
-        <div className="absolute h-full w-[1px] bg-[#00FF41]/30"></div>
-      </div>
+    <section id="about" className="w-full min-h-screen bg-[#020202] text-white font-mono py-24 px-6 md:px-12 flex flex-col items-center justify-center relative overflow-hidden">
+      
+      <div className="max-w-7xl mx-auto w-full space-y-12 relative z-10">
+        <header className="border-b border-[#00FF41]/20 pb-6 mb-8">
+          <motion.h2 
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-5xl font-bold text-[#00FF41] tracking-tighter"
+          >
+            &gt; cat about_club.md
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="mt-2 text-gray-400"
+          >
+            System overview, core directives, and operational capacity.
+          </motion.p>
+        </header>
 
-      <div className="relative w-full max-w-4xl aspect-square flex items-center justify-center">
-        
-        {/* THE SCANNING BEAM */}
+        {/* BENTO GRID LAYOUT */}
         <motion.div 
-          style={{ rotate: rotation }}
-          className="absolute w-[150px] h-[150px] md:w-[300px] md:h-[300px] origin-bottom-right top-[calc(50%-150px)] left-[calc(50%-150px)] md:top-[calc(50%-300px)] md:left-[calc(50%-300px)] z-10 pointer-events-none"
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[minmax(180px,auto)]"
         >
-          <div className="w-full h-full bg-gradient-to-br from-[#00FF41]/40 to-transparent rounded-tl-full blur-sm"></div>
-        </motion.div>
-
-        {/* RADAR NODES (Pings) */}
-        {SECTORS.map((sector) => {
-          // Check if the radar beam is currently "hitting" this sector
-          const isHit = Math.abs(rotation - sector.angle) < 15;
           
-          return (
-            <div 
-              key={sector.id}
-              className="absolute transition-all duration-700"
-              style={{
-                transform: `rotate(${sector.angle}deg) translate(${typeof window !== 'undefined' && window.innerWidth < 768 ? '120px' : '250px'}) rotate(-${sector.angle}deg)`
-              }}
-            >
-              <div className="relative group">
-                {/* The Blip */}
-                <div className={`w-3 h-3 rounded-full transition-all duration-300 ${isHit ? 'bg-[#00FF41] scale-150 shadow-[0_0_20px_#00FF41]' : 'bg-[#00FF41]/20'}`}></div>
-                
-                {/* The Info Box (Appears on beam hit or hover) */}
-                <div className={`absolute left-6 top-[-20px] w-48 p-3 border border-[#00FF41]/30 bg-black/80 backdrop-blur-md transition-all duration-500 ${isHit || 'group-hover:opacity-100' ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[9px] text-[#00FF41] font-bold">{sector.id}</span>
-                    <span className="text-[8px] text-gray-500">AZIMUTH: {sector.angle}°</span>
-                  </div>
-                  <h4 className="text-xs font-bold text-white mb-1 uppercase tracking-tighter">{sector.label}</h4>
-                  <p className="text-[10px] text-gray-400 leading-tight">{sector.detail}</p>
-                </div>
+          {/* Card 1: Main Mission (Large) */}
+          <motion.div variants={item} className="md:col-span-2 lg:col-span-2 row-span-2 p-8 border border-[#00FF41]/30 bg-[#050505] shadow-[0_0_15px_rgba(0,255,65,0.05)] hover:border-[#00FF41] transition-colors duration-500 group flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-[#00FF41]/5 rounded-bl-full transform origin-top-right group-hover:scale-150 transition-transform duration-700"></div>
+            <div>
+              <h3 className="text-[#00FF41] text-xs uppercase tracking-widest font-bold mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#00FF41] inline-block animate-pulse"></span>
+                Core_Mission
+              </h3>
+              <h4 className="text-2xl font-bold text-gray-100 mb-4 leading-tight">
+                Bridging the gap between raw theory and real-world deployment.
+              </h4>
+              <div className="space-y-4 text-gray-400 text-sm leading-relaxed">
+                <p>
+                  The BIAS Coding Club is not just a study group; it is a deployment facility. We exist to transform students into engineers capable of architecture, optimization, and scaling. 
+                </p>
+                <p>
+                  Whether it is competing in global hackathons, contributing to high-impact open-source repositories, or mastering algorithmic complexities, our community pushes the boundaries of what college developers can build.
+                </p>
               </div>
             </div>
-          );
-        })}
+          </motion.div>
 
-        {/* Center Core */}
-        <div className="z-20 w-12 h-12 bg-black border-2 border-[#00FF41] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,255,65,0.2)]">
-          <div className="w-2 h-2 bg-[#00FF41] rounded-full animate-ping"></div>
-        </div>
+          {/* Card 2: Domains/Tech Stack */}
+          <motion.div variants={item} className="md:col-span-1 lg:col-span-2 p-8 border border-[#00FF41]/20 bg-[#080808] hover:border-[#00FF41]/60 transition-colors duration-500">
+            <h3 className="text-[#00FF41] text-xs uppercase tracking-widest font-bold mb-4">Active_Domains</h3>
+            <div className="flex flex-wrap gap-3">
+              {['Data Structures', 'Algorithms', 'Full-Stack Dev', 'Machine Learning', 'Web3 / Blockchain', 'System Design', 'Cybersecurity'].map((tech) => (
+                <span key={tech} className="px-3 py-1.5 border border-gray-700 text-gray-300 text-xs rounded-sm hover:border-[#00FF41] hover:text-[#00FF41] transition-all cursor-crosshair">
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </motion.div>
 
-        {/* Static HUD Text */}
-        <div className="absolute top-10 left-0 text-[10px] text-[#00FF41]/60 flex flex-col gap-1">
-          <p>&gt; SCANNING_SECTORS...</p>
-          <p>&gt; FREQ: 2.4GHZ</p>
-          <p>&gt; RANGE: 500KM</p>
-        </div>
-        
-        <div className="absolute bottom-10 right-0 text-[10px] text-[#00FF41]/60 text-right">
-          <p>OBJECT_TRACKING: ENABLED</p>
-          <p>IDENT_MODE: FRIEND_OR_FOE</p>
-          <p className="text-[#00FF41] font-bold">BIAS_MAIN_GRID</p>
-        </div>
+          {/* Card 3: The Mini Terminal */}
+          <motion.div variants={item} className="md:col-span-1 lg:col-span-1 row-span-2 p-6 border border-[#00FF41]/20 bg-[#030303] flex flex-col font-mono text-xs text-[#00FF41]/80 shadow-inner">
+            <div className="flex justify-between items-center border-b border-[#00FF41]/20 pb-2 mb-4">
+              <span>root@bias-club:~</span>
+              <span className="w-2 h-2 rounded-full bg-[#00FF41]"></span>
+            </div>
+            <div className="flex-1 whitespace-pre-wrap leading-loose">
+              {terminalText}
+              <span className="animate-pulse inline-block w-2 h-3 bg-[#00FF41] ml-1"></span>
+            </div>
+          </motion.div>
+
+          {/* Card 4: Quick Stats */}
+          <motion.div variants={item} className="md:col-span-2 lg:col-span-1 p-8 border border-[#00FF41]/20 bg-[#050505] flex flex-col justify-center items-center text-center group hover:bg-[#00FF41]/5 transition-colors duration-500">
+            <span className="text-4xl font-bold text-[#00FF41] mb-2 group-hover:scale-110 transition-transform">∞</span>
+            <span className="text-gray-400 text-xs uppercase tracking-widest">Lines of Code</span>
+          </motion.div>
+
+          {/* Card 5: Join CTA / Focus */}
+          <motion.div variants={item} className="md:col-span-1 lg:col-span-1 p-8 border border-[#00FF41]/20 bg-[#050505] flex flex-col justify-center">
+            <h3 className="text-[#00FF41] text-xs uppercase tracking-widest font-bold mb-2">Current_Focus</h3>
+            <p className="text-gray-300 text-sm mb-4">Preparing for upcoming competitive programming regionals.</p>
+            <a href="#join" className="text-[#00FF41] text-xs uppercase tracking-wider hover:underline border-l-2 border-[#00FF41] pl-2">
+              Apply for Access -&gt;
+            </a>
+          </motion.div>
+
+        </motion.div>
       </div>
     </section>
   );
