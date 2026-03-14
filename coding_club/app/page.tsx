@@ -9,7 +9,8 @@ import ScrollSequence from '../Components/TechCentre';
 import EventGallery from '../Components/EventGallery';
 import JoinClubForm from '../Components/JoinClub';
 import LeadershipSection from '@/Components/leadership';
-import AboutSection from '@/Components/AboutTheClub';
+import MainframeCore from '@/Components/AboutTheClub';
+
 import Footer from '@/Components/footer';
 import AboutIDE from '@/Components/AboutTheClub';
 export default function Page() {
@@ -17,7 +18,7 @@ export default function Page() {
     <main>
       <HeaderSection />
       <HeroScroller />
-      <AboutIDE />
+      <MainframeCore />
       <Terminal />
       <About3D />
       <ClubTechStack />
