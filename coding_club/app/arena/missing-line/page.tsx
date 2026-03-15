@@ -242,6 +242,7 @@ export default function MissingLinePage() {
   const [userCodes, setUserCodes] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState("javascript")
 
   /* ── visual extras ── */
   const taskText = useTypewriter(
@@ -253,6 +254,7 @@ export default function MissingLinePage() {
 
   /* ── original startGame — untouched ── */
   async function startGame(data: { language: string; difficulty: string; count: number }) {
+    setSelectedLanguage(data.language);
     setLoading(true);
     const res = await fetch("/api/missing-line/generate-questions", {
       method: "POST",
@@ -419,7 +421,7 @@ export default function MissingLinePage() {
                 <div style={{ marginBottom:22 }}>
                   <CodeBlock
                     code={userCodes[currentIndex] ?? q.code}
-                    language="javascript"
+                    language={selectedLanguage}
                     onChange={handleCodeChange}
                   />
                 </div>

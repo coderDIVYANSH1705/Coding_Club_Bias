@@ -5,7 +5,7 @@ import { NextResponse } from "next/server"
 const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
 const groq = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
+  apiKey: process.env.GROQ_API_KEY!,
   baseURL: "https://api.groq.com/openai/v1"
 })
 
@@ -34,28 +34,42 @@ Rules:
 - No markdown
 - No explanations
 - No headings
+- Escape line breaks using \\n
 `
 
-  // helper to safely parse AI JSON
+  /* ───────── SAFE JSON PARSER ───────── */
   function parseAIJSON(text: string) {
 
+    // remove markdown
     text = text.replace(/```json/g, "").replace(/```/g, "").trim()
 
     const start = text.indexOf("[")
     const end = text.lastIndexOf("]")
 
     if (start === -1 || end === -1) {
-      throw new Error("Invalid JSON from AI")
+      throw new Error("AI returned invalid JSON")
     }
 
-    const jsonText = text.slice(start, end + 1)
+    let jsonText = text.slice(start, end + 1)
 
-    return JSON.parse(jsonText)
+    // remove control characters
+    jsonText = jsonText.replace(/[\u0000-\u001F]+/g, " ")
+
+    // fix invalid escapes
+    jsonText = jsonText.replace(/\\(?!["\\/bfnrtu])/g, "\\\\")
+
+    try {
+      return JSON.parse(jsonText)
+    } catch (err) {
+      console.error("Broken AI JSON:", jsonText)
+      throw err
+    }
   }
 
   try {
 
-    // GEMINI FIRST
+    /* ───────── TRY GEMINI FIRST ───────── */
+
     const model = gemini.getGenerativeModel({
       model: "models/gemini-2.5-flash"
     })
@@ -77,10 +91,19 @@ Rules:
 
     try {
 
+      /* ───────── GROQ FALLBACK ───────── */
+
       const completion = await groq.chat.completions.create({
         model: "llama-3.1-8b-instant",
         messages: [
-          { role: "user", content: prompt }
+          {
+            role: "system",
+            content: "You are a strict JSON API. Return ONLY JSON."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
         ]
       })
 
