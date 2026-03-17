@@ -205,7 +205,7 @@ export default function AboutBento() {
               transition={{ duration: 1.8, repeat: Infinity, repeatType: "reverse" }}
               className="inline-block w-1.5 h-1.5 rounded-full bg-[#00FF41]"
             />
-            Core directives &amp; operational capacity — last updated 2025
+            Core directives &amp; operational capacity — last updated 2026
           </div>
         </motion.header>
 
