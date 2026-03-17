@@ -18,12 +18,14 @@ export default function Page() {
       <HeaderSection />
       <HeroScroller />
       <AboutBento />
+      <LeadershipSection />
       <Terminal />
+       <EventGallery />
       <About3D />
       <ClubTechStack />
       <EventGallery />
       <JoinClubForm />
-      <LeadershipSection />
+      
       <Footer />
     </main>
   );
