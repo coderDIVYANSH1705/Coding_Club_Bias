@@ -89,12 +89,11 @@ function LeaderCard({ leader }: { leader: Leader }) {
       <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#00FF41] opacity-50"></div>
 
       <div className="relative w-32 h-32 md:w-40 md:h-40 mb-4 rounded-full overflow-hidden border-2 border-[#00FF41]/30 group-hover:border-[#00FF41] transition-colors duration-500">
-        <div className="absolute inset-0 bg-[#00FF41]/20 group-hover:bg-transparent transition-colors duration-500 z-10 mix-blend-overlay"></div>
         <Image 
           src={leader.image_url} 
           alt={leader.name}
           fill
-          unoptimized={true} // <-- The Fix
+          unoptimized={true}
           className="object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-out"
         />
       </div>
