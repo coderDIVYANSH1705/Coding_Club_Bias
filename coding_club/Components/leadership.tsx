@@ -36,7 +36,7 @@ export default async function LeadershipSection() {
         
         <header className="text-center space-y-4">
           <h2 className="text-4xl md:text-5xl font-bold text-[#00FF41] tracking-tighter">
-            ./Command_Team
+            ./Faculty_Coordinators
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
             The architects and operators behind the BIAS Coding Club mainframe.
@@ -47,7 +47,7 @@ export default async function LeadershipSection() {
         {faculty.length > 0 && (
           <div className="space-y-8">
             <h3 className="text-2xl border-b border-[#00FF41]/20 pb-2 text-gray-300 inline-block">
-              &gt; Root_Advisors
+              &gt; Faculty Coordinators
             </h3>
             <div className="flex flex-wrap justify-center gap-8">
               {faculty.map(leader => (
