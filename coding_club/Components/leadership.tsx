@@ -63,7 +63,7 @@ export default async function LeadershipSection() {
         {students.length > 0 && (
           <div className="space-y-8">
             <h3 className="text-2xl border-b border-[#00FF41]/20 pb-2 text-gray-300 inline-block">
-              &gt; Core_Operators
+              &gt; Student Coordinators
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {students.map(leader => (
