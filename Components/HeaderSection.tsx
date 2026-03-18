@@ -2,7 +2,6 @@
 import { useState, useRef, MouseEvent } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import GlassSurface from "./GlassSurface";
-// Optional: If you want soft-routing instead of full page reloads, import Link from 'next/link'
 
 function scrollToId(id: string) {
   const el = document.getElementById(id);
@@ -38,7 +37,7 @@ const CodingClubHeader = () => {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-auto"
+        className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4"
       >
         <GlassSurface
           width="auto"
@@ -59,14 +58,18 @@ const CodingClubHeader = () => {
           yChannel="G"
           mixBlendMode="difference"
         >
-          <nav className="flex items-center gap-6 px-6 py-2.5">
+          <nav className="flex items-center justify-between gap-4 px-5 py-2.5 w-full">
             {/* Logo */}
-            <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 400 }}>
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 400 }}
+              className="flex-shrink-0"
+            >
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-green-400 tracking-tight whitespace-nowrap font-mono">
+                <span className="text-base md:text-lg font-bold text-green-400 tracking-tight whitespace-nowrap font-mono">
                   &lt;CodeClub /&gt;
                 </span>
-                <span className="text-[9px] text-white/40 tracking-widest uppercase font-mono">
+                <span className="text-[8px] md:text-[9px] text-white/40 tracking-widest uppercase font-mono hidden sm:block">
                   Birla Institute of Applied Sciences
                 </span>
               </div>
@@ -83,63 +86,66 @@ const CodingClubHeader = () => {
                   {item.label}
                 </MagneticLink>
               ))}
-              
-              {/* ADMIN LOGIN LINK ADDED HERE */}
+
+              {/* ADMIN LOGIN LINK */}
               <MagneticLink href="/admin/login">
                 <span className="text-green-400 font-bold">_ADMIN</span>
               </MagneticLink>
             </ul>
 
-            {/* Join CTA */}
-            <GlassSurface
-              width="auto"
-              height="auto"
-              borderRadius={30}
-              borderWidth={0.06}
-              brightness={60}
-              opacity={0.92}
-              blur={10}
-              displace={0.4}
-              backgroundOpacity={0.08}
-              saturation={1.3}
-              distortionScale={-120}
-              redOffset={0}
-              greenOffset={5}
-              blueOffset={10}
-              xChannel="R"
-              yChannel="G"
-              mixBlendMode="screen"
-              className="cursor-pointer hidden md:block ml-2"
-            >
-              <motion.button
-                onClick={() => scrollToId('join')} // Assuming you have a join section
-                whileTap={{ scale: 0.95 }}
-                className="px-5 py-2 text-sm font-medium text-green-400 whitespace-nowrap font-mono"
+            {/* Right side: Join CTA + Mobile Menu Button */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {/* Join CTA — desktop only */}
+              <GlassSurface
+                width="auto"
+                height="auto"
+                borderRadius={30}
+                borderWidth={0.06}
+                brightness={60}
+                opacity={0.92}
+                blur={10}
+                displace={0.4}
+                backgroundOpacity={0.08}
+                saturation={1.3}
+                distortionScale={-120}
+                redOffset={0}
+                greenOffset={5}
+                blueOffset={10}
+                xChannel="R"
+                yChannel="G"
+                mixBlendMode="screen"
+                className="cursor-pointer hidden md:block"
               >
-                &gt;_ Join Us
-              </motion.button>
-            </GlassSurface>
+                <motion.button
+                  onClick={() => scrollToId("join")}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-5 py-2 text-sm font-medium text-green-400 whitespace-nowrap font-mono"
+                >
+                  &gt;_ Join Us
+                </motion.button>
+              </GlassSurface>
 
-            {/* Mobile Menu Button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden text-white/90 hover:text-white transition-colors p-2"
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </motion.button>
+              {/* Mobile Menu Button */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden text-white/90 hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/10"
+                aria-label="Toggle menu"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </motion.button>
+            </div>
           </nav>
         </GlassSurface>
       </motion.header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -151,10 +157,10 @@ const CodingClubHeader = () => {
           <div className="absolute inset-0 backdrop-blur-xl bg-black/40" />
 
           <motion.div
-            initial={{ y: -100, opacity: 0 }}
+            initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
-            className="absolute top-24 left-1/2 -translate-x-1/2 w-[90%]"
+            className="absolute top-24 left-4 right-4"
             onClick={(e) => e.stopPropagation()}
           >
             <GlassSurface
@@ -176,51 +182,53 @@ const CodingClubHeader = () => {
               yChannel="G"
               mixBlendMode="difference"
             >
-              <ul className="flex flex-col gap-2 p-6 w-full">
+              <ul className="flex flex-col gap-1 p-4 w-full">
                 {NAV_ITEMS.map((item, index) => (
                   <motion.li
                     key={item.label}
-                    initial={{ x: -50, opacity: 0 }}
+                    initial={{ x: -30, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
+                    transition={{ delay: index * 0.07 }}
                   >
                     <a
                       href={item.scrollTo ? undefined : item.href}
                       onClick={item.scrollTo ? () => handleNavClick(item) : undefined}
-                      className="block text-white/80 hover:text-green-400 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-white/5 cursor-pointer font-mono text-sm"
+                      className="flex items-center text-white/80 hover:text-green-400 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-white/5 cursor-pointer font-mono text-sm"
                     >
-                      <span className="text-green-400 mr-2 opacity-60">{">"}</span>
+                      <span className="text-green-400 mr-2 opacity-50 text-xs">{">"}</span>
                       {item.label}
                     </a>
                   </motion.li>
                 ))}
 
-                {/* ADMIN LOGIN FOR MOBILE */}
+                {/* ADMIN LOGIN — Mobile */}
                 <motion.li
-                  initial={{ x: -50, opacity: 0 }}
+                  initial={{ x: -30, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: NAV_ITEMS.length * 0.1 }}
+                  transition={{ delay: NAV_ITEMS.length * 0.07 }}
                 >
                   <a
                     href="/admin/login"
-                    className="block text-green-400 font-bold hover:text-green-300 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-white/5 cursor-pointer font-mono text-sm"
+                    className="flex items-center text-green-400 font-bold hover:text-green-300 transition-all duration-300 py-3 px-4 rounded-xl hover:bg-white/5 cursor-pointer font-mono text-sm"
                   >
-                    <span className="text-green-400 mr-2 opacity-60">{">"}</span>
+                    <span className="text-green-400 mr-2 opacity-50 text-xs">{">"}</span>
                     _ROOT
                   </a>
                 </motion.li>
 
-                {/* Join CTA Mobile */}
+                {/* Divider */}
+                <li className="my-1 border-t border-white/10" />
+
+                {/* Join CTA — Mobile */}
                 <motion.li
-                  initial={{ x: -50, opacity: 0 }}
+                  initial={{ x: -30, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: (NAV_ITEMS.length + 1) * 0.1 }}
-                  className="pt-2"
+                  transition={{ delay: (NAV_ITEMS.length + 1) * 0.07 }}
                 >
                   <GlassSurface
                     width="100%"
                     height="auto"
-                    borderRadius={30}
+                    borderRadius={16}
                     borderWidth={0.06}
                     brightness={60}
                     opacity={0.92}
@@ -239,10 +247,10 @@ const CodingClubHeader = () => {
                   >
                     <button
                       onClick={() => {
-                        scrollToId('join');
+                        scrollToId("join");
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full text-green-400 font-medium text-sm py-3 font-mono"
+                      className="w-full text-green-400 font-medium text-sm py-3 font-mono tracking-wide"
                     >
                       &gt;_ Join Us
                     </button>
