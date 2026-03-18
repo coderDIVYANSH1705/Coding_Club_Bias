@@ -32,7 +32,7 @@ export default function JoinClubForm() {
   };
 
   return (
-    <section className="w-full bg-black text-white font-mono py-12 md:py-24 px-6 md:px-12 border-t border-[#00FF41]/20">
+    <section id="join" className="w-full bg-black text-white font-mono py-12 md:py-24 px-6 md:px-12 border-t border-[#00FF41]/20">
       <div className="max-w-3xl mx-auto space-y-8">
         <header>
           <h2 className="text-3xl md:text-4xl font-bold text-[#00FF41] tracking-tighter">
