@@ -12,13 +12,14 @@ export default function JoinClubForm() {
     const formData = new FormData(e.currentTarget);
     const full_name = formData.get('full_name') as string;
     const email = formData.get('email') as string;
+    const phone = formData.get('phone') as string;
     const branch_year = formData.get('branch_year') as string;
     const reason = formData.get('reason') as string;
 
     try {
       const { error } = await supabase
         .from('members')
-        .insert([{ full_name, email, branch_year, reason }]);
+        .insert([{ full_name, email, phone, branch_year, reason }]);
 
       if (error) throw error;
       
@@ -64,12 +65,21 @@ export default function JoinClubForm() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-sm uppercase tracking-wider text-[#00FF41]">Branch & Year_</label>
-              <input type="text" name="branch_year" required
-                className="w-full bg-transparent border border-[#00FF41]/50 p-3 text-white focus:outline-none focus:border-[#00FF41] transition-all"
-                placeholder="e.g., B.Tech 2nd Year - Computer Science"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="block text-sm uppercase tracking-wider text-[#00FF41]">Phone Number_</label>
+                <input type="tel" name="phone" required
+                  className="w-full bg-transparent border border-[#00FF41]/50 p-3 text-white focus:outline-none focus:border-[#00FF41] transition-all"
+                  placeholder="+91 XXXXX XXXXX"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-sm uppercase tracking-wider text-[#00FF41]">Branch & Year_</label>
+                <input type="text" name="branch_year" required
+                  className="w-full bg-transparent border border-[#00FF41]/50 p-3 text-white focus:outline-none focus:border-[#00FF41] transition-all"
+                  placeholder="e.g., B.Tech 2nd Year - Computer Science"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
