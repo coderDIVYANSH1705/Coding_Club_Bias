@@ -23,7 +23,6 @@ export default function Page() {
        <EventGallery />
       <About3D />
       <ClubTechStack />
-      <EventGallery />
       <JoinClubForm />
       
       <Footer />
