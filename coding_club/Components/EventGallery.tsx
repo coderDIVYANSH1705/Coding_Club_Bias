@@ -54,9 +54,7 @@ export default async function EventGallery() {
                   <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">
                     {event.description}
                   </p>
-                  <button className="text-[#00FF41] text-sm uppercase tracking-wider text-left hover:underline w-fit">
-                    Read_More &gt;
-                  </button>
+                
                 </div>
               </article>
             ))}
