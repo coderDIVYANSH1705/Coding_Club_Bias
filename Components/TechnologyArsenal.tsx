@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, memo } from 'react';
 import { motion, useScroll, useTransform, useSpring, MotionValue } from 'framer-motion';
 
 const ALL_TECHS = [
@@ -39,18 +39,28 @@ const ALL_TECHS = [
 const LEFT_TECHS = ALL_TECHS.slice(0, 15);
 const RIGHT_TECHS = ALL_TECHS.slice(15);
 
-const TechNode = ({ tech, index, total, wheelRotation }: { tech: any, index: number, total: number, wheelRotation: MotionValue<number> }) => {
+// OPTIMIZATION: React.memo prevents unnecessary re-renders of the 30 individual icons
+const TechNode = memo(({ tech, index, total, wheelRotation }: { tech: any, index: number, total: number, wheelRotation: MotionValue<number> }) => {
   const angle = (index / total) * 360;
   const counterRotation = useTransform(wheelRotation, (r) => -r - angle);
 
   return (
-    <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ transform: `rotate(${angle}deg)` }}>
+    <div className="absolute top-0 left-0 w-full h-full pointer-events-none transform-gpu" style={{ transform: `rotate(${angle}deg)` }}>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-        <motion.div style={{ rotate: counterRotation }}>
-          <div className="group relative w-12 h-12 md:w-20 md:h-20 bg-zinc-950 border border-white/10 hover:border-[#00ff88] rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-500 hover:scale-110 cursor-pointer">
-            <img src={tech.icon} alt={tech.name} className={`w-6 h-6 md:w-10 md:h-10 object-contain ${tech.invert ? 'invert opacity-70' : ''}`} />
-            <div className="absolute top-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50">
-              <span className="bg-[#00ff88] text-[#0a0f1e] text-[10px] font-bold px-3 py-1 rounded tracking-wider whitespace-nowrap uppercase">
+        {/* OPTIMIZATION: willChange heavily optimizes the counter-rotation on the GPU */}
+        <motion.div style={{ rotate: counterRotation, willChange: 'transform' }}>
+          <div className="group relative w-12 h-12 md:w-20 md:h-20 bg-zinc-950 border border-white/10 hover:border-[#00ff88] rounded-2xl flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 cursor-pointer transform-gpu">
+            {/* OPTIMIZATION: Added decoding and loading attributes */}
+            <img 
+              src={tech.icon} 
+              alt={tech.name} 
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+              className={`w-6 h-6 md:w-10 md:h-10 object-contain select-none ${tech.invert ? 'invert opacity-70' : ''}`} 
+            />
+            <div className="absolute top-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 pointer-events-none">
+              <span className="bg-[#00ff88] text-[#0a0f1e] text-[10px] font-bold px-3 py-1 rounded tracking-wider whitespace-nowrap uppercase shadow-lg">
                 {tech.name}
               </span>
             </div>
@@ -59,13 +69,14 @@ const TechNode = ({ tech, index, total, wheelRotation }: { tech: any, index: num
       </div>
     </div>
   );
-};
+});
+TechNode.displayName = 'TechNode';
 
-const ScrollWheel = ({ side, techs, progress }: { side: 'left' | 'right', techs: any[], progress: MotionValue<number> }) => {
+// OPTIMIZATION: Memoized the wheel to isolate the layout
+const ScrollWheel = memo(({ side, techs, progress }: { side: 'left' | 'right', techs: any[], progress: MotionValue<number> }) => {
   const isLeft = side === 'left';
   const rawRotation = useTransform(progress, [0, 1], [0, isLeft ? 360 : -360]);
   
-  // ULTRA SMOOTH PHYSICS: Lower stiffness and higher damping for that "liquid" feel
   const smoothRotation = useSpring(rawRotation, { 
     stiffness: 25, 
     damping: 15, 
@@ -77,36 +88,39 @@ const ScrollWheel = ({ side, techs, progress }: { side: 'left' | 'right', techs:
   const positionClasses = isLeft ? "-left-[280px] md:-left-[450px]" : "-right-[280px] md:-right-[450px]";
 
   return (
-    <div className={`absolute top-1/2 -translate-y-1/2 ${sizeClasses} ${positionClasses} z-20`}>
-      <div className="absolute inset-0 rounded-full border border-white/5 bg-black/40 backdrop-blur-3xl" />
-      <div className="absolute inset-10 rounded-full border border-dashed border-[#00ff88]/10" />
-      <motion.div style={{ rotate: smoothRotation }} className="w-full h-full relative">
+    <div className={`absolute top-1/2 -translate-y-1/2 ${sizeClasses} ${positionClasses} z-20 pointer-events-none`}>
+      <div className="absolute inset-0 rounded-full border border-white/5 bg-black/40 backdrop-blur-3xl transform-gpu" />
+      <div className="absolute inset-10 rounded-full border border-dashed border-[#00ff88]/10 transform-gpu" />
+      {/* OPTIMIZATION: willChange to force the massive wheel onto the GPU compositor */}
+      <motion.div style={{ rotate: smoothRotation, willChange: 'transform' }} className="w-full h-full relative">
         {techs.map((tech, i) => (
           <TechNode key={tech.name} tech={tech} index={i} total={techs.length} wheelRotation={smoothRotation} />
         ))}
       </motion.div>
     </div>
   );
-};
+});
+ScrollWheel.displayName = 'ScrollWheel';
 
 export default function SmoothTechArsenal() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
+  
+  // OPTIMIZATION: Ensured opacity fade is also hardware accelerated
   const textOpacity = useTransform(scrollYProgress, [0.85, 1], [1, 0]);
 
   return (
     <div ref={containerRef} className="relative w-full h-[400vh] bg-[#030303]">
       <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
         
-        {/* REVERTED TO GREEN GRADIENT MASK */}
         <div className="absolute inset-0 z-10 pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)' }}>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-[#00ff88]/15 blur-[140px] rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-[#00ff88]/15 blur-[140px] rounded-full transform-gpu" />
           <ScrollWheel side="left" techs={LEFT_TECHS} progress={scrollYProgress} />
           <ScrollWheel side="right" techs={RIGHT_TECHS} progress={scrollYProgress} />
         </div>
 
         {/* Center Content */}
-        <motion.div style={{ opacity: textOpacity }} className="relative z-30 text-center max-w-2xl px-6 pointer-events-none">
+        <motion.div style={{ opacity: textOpacity, willChange: 'opacity' }} className="relative z-30 text-center max-w-2xl px-6 pointer-events-none transform-gpu">
           <div className="inline-flex items-center gap-3 px-5 py-2 mb-8 rounded-full border border-[#00ff88]/20 bg-zinc-950/90 backdrop-blur-md">
             <div className="w-2 h-2 rounded-full bg-[#00ff88] animate-pulse" />
             <span className="text-zinc-400 text-xs font-bold tracking-[0.2em] uppercase">The Tech Ecosystem</span>
@@ -120,13 +134,13 @@ export default function SmoothTechArsenal() {
           </h2>
 
           <p className="text-zinc-500 text-lg md:text-xl font-light leading-relaxed max-w-sm mx-auto">
-            Get a chance to work on industry-relevant projects and build your portfolio with the latest technologies.  All with Coding Club Bias!
+            Get a chance to work on industry-relevant projects and build your portfolio with the latest technologies. All with Coding Club Bias!
           </p>
         </motion.div>
 
         {/* Side Masks */}
-        <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#030303] to-transparent z-40" />
-        <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#030303] to-transparent z-40" />
+        <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#030303] to-transparent z-40 pointer-events-none transform-gpu" />
+        <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#030303] to-transparent z-40 pointer-events-none transform-gpu" />
       </div>
     </div>
   );
