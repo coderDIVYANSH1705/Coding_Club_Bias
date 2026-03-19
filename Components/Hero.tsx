@@ -18,8 +18,8 @@ const Pill = ({ children }: { children: React.ReactNode }) => (
     background: 'rgba(0,255,136,0.06)',
     color: G,
     fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase' as const,
-    whiteSpace: 'nowrap' as const,
+    fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase',
+    whiteSpace: 'nowrap',
   }}>
     {children}
   </span>
@@ -36,26 +36,24 @@ const Stat = ({ value, label }: { value: string; label: string }) => (
     }}>{value}</span>
     <span style={{
       fontFamily: "'JetBrains Mono', monospace", fontSize: '0.52rem',
-      color: 'rgba(255,255,255,0.3)', letterSpacing: '0.18em', textTransform: 'uppercase' as const,
+      color: 'rgba(255,255,255,0.3)', letterSpacing: '0.18em', textTransform: 'uppercase',
     }}>{label}</span>
   </div>
 );
 
 const EventCard = ({ icon, title, date, tag }: { icon: string; title: string; date: string; tag: string }) => (
-  <div style={{
+  <div className="event-card" style={{
     padding: 'clamp(12px,2vw,18px) clamp(12px,2vw,20px)', borderRadius: 12,
     border: '1px solid rgba(0,255,136,0.1)',
     background: 'rgba(0,0,0,0.5)',
     backdropFilter: 'blur(10px)',
     display: 'flex', flexDirection: 'column', gap: 6,
-    transition: 'border-color 0.25s, transform 0.25s',
-  }}
-    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,255,136,0.35)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
-    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,255,136,0.1)'; (e.currentTarget as HTMLElement).style.transform = ''; }}
-  >
+    transition: 'border-color 0.25s ease, transform 0.25s ease',
+    willChange: 'transform, border-color'
+  }}>
     <span style={{ fontSize: '1.1rem' }}>{icon}</span>
     <div style={{ fontFamily: "'Orbitron', monospace", fontSize: 'clamp(0.65rem,1.5vw,0.85rem)', color: '#fff', fontWeight: 700, lineHeight: 1.3 }}>{title}</div>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6, flexWrap: 'wrap' as const }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
       <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>{date}</span>
       <Pill>{tag}</Pill>
     </div>
@@ -73,13 +71,15 @@ export default function HeroScroller() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d');
+    const context = canvas?.getContext('2d', { alpha: false }); // Opt: Disable alpha for better performance
     if (!canvas || !context) return;
 
     const frameCount = 240;
     const images: HTMLImageElement[] = [];
     const sequence = { frame: 1 };
+    let lastRenderedFrame = -1; // Opt: Track to avoid redundant repaints
 
+    // Preload images
     for (let i = 1; i <= frameCount; i++) {
       const img = new Image();
       img.src = `/Hero/${i}.jpg`;
@@ -87,8 +87,14 @@ export default function HeroScroller() {
     }
 
     const render = () => {
-      const img = images[sequence.frame - 1];
+      const currentFrame = Math.round(sequence.frame) - 1;
+      
+      // Opt: Skip rendering if the frame hasn't actually changed
+      if (currentFrame === lastRenderedFrame) return;
+      
+      const img = images[currentFrame];
       if (!img || !img.complete) return;
+      
       canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
       const hRatio = canvas.width  / img.width;
@@ -96,12 +102,23 @@ export default function HeroScroller() {
       const ratio  = Math.max(hRatio, vRatio);
       const cx = (canvas.width  - img.width  * ratio) / 2;
       const cy = (canvas.height - img.height * ratio) / 2;
-      context.clearRect(0, 0, canvas.width, canvas.height);
+      
       context.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
+      lastRenderedFrame = currentFrame;
     };
 
     images[0].onload = render;
-    window.addEventListener('resize', render);
+
+    // Opt: Throttled resize handler
+    let resizeTimeout: number;
+    const handleResize = () => {
+      if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
+      resizeTimeout = requestAnimationFrame(() => {
+        lastRenderedFrame = -1; // Force a re-render on resize
+        render();
+      });
+    };
+    window.addEventListener('resize', handleResize);
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -109,7 +126,7 @@ export default function HeroScroller() {
           trigger: containerRef.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.2,
+          scrub: 1.2, // Smoothes out mouse wheel steps
         },
       });
 
@@ -134,7 +151,7 @@ export default function HeroScroller() {
     }, containerRef);
 
     return () => {
-      window.removeEventListener('resize', render);
+      window.removeEventListener('resize', handleResize);
       ctx.revert();
     };
   }, []);
@@ -163,7 +180,6 @@ export default function HeroScroller() {
           position: absolute;
           pointer-events: none;
           will-change: transform, opacity;
-          /* Push content below fixed navbar on all screens */
           padding-top: env(safe-area-inset-top);
         }
 
@@ -172,95 +188,94 @@ export default function HeroScroller() {
         @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
         .float { animation: floatY 3.5s ease-in-out infinite; }
 
-        /* ── Responsive panel content ─────────────────────────────── */
+        /* --- Opt: Pure CSS Hover States --- */
+        .event-card:hover {
+          border-color: rgba(0,255,136,0.35) !important;
+          transform: translateY(-2px);
+        }
 
-        /* PANEL 0 — intro */
+        .btn-primary {
+          padding: 12px clamp(20px,4vw,30px);
+          border-radius: 8px;
+          background: ${G};
+          color: #050505;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: clamp(0.68rem,1.5vw,0.78rem);
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          border: none;
+          cursor: pointer;
+          box-shadow: 0 0 22px rgba(0,255,136,0.4);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          pointer-events: auto;
+          will-change: transform, box-shadow;
+        }
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0 36px rgba(0,255,136,0.6);
+        }
+
+        .btn-secondary {
+          padding: 11px clamp(20px,4vw,30px);
+          border-radius: 8px;
+          background: transparent;
+          color: rgba(255,255,255,0.65);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: clamp(0.68rem,1.5vw,0.78rem);
+          font-weight: 500;
+          letter-spacing: 0.1em;
+          border: 1px solid rgba(0,255,136,0.22);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          pointer-events: auto;
+          will-change: border-color, color;
+        }
+        .btn-secondary:hover {
+          border-color: rgba(0,255,136,0.55);
+          color: ${G};
+        }
+
+        /* ── Responsive panel content ─────────────────────────────── */
         .p0-inner {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          /* top padding = navbar height so title never hides under it */
+          display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
           padding: clamp(80px, 14vw, 120px) 20px clamp(20px, 4vw, 48px);
-          width: 100%;
-          height: 100%;
-          box-sizing: border-box;
+          width: 100%; height: 100%; box-sizing: border-box;
         }
 
         .stats-strip {
-          display: flex;
-          gap: clamp(14px, 3.5vw, 48px);
-          justify-content: center;
-          flex-wrap: wrap;
-          padding: clamp(12px,2vw,18px) clamp(16px,3vw,28px);
-          border-radius: 14px;
-          border: 1px solid rgba(0,255,136,0.12);
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(14px);
-          max-width: 100%;
+          display: flex; gap: clamp(14px, 3.5vw, 48px); justify-content: center; flex-wrap: wrap;
+          padding: clamp(12px,2vw,18px) clamp(16px,3vw,28px); border-radius: 14px;
+          border: 1px solid rgba(0,255,136,0.12); background: rgba(0,0,0,0.5);
+          backdrop-filter: blur(14px); max-width: 100%;
         }
 
-        /* PANEL 1 — events (left-aligned desktop, centred mobile) */
         .p1-inner {
-          display: flex;
-          align-items: center;
-          width: 100%;
-          height: 100%;
-          box-sizing: border-box;
-          /* top pad clears navbar, sides breathe */
+          display: flex; align-items: center; width: 100%; height: 100%; box-sizing: border-box;
           padding: clamp(80px,14vw,120px) clamp(16px,5vw,80px) clamp(24px,4vw,60px);
         }
-        .p1-content {
-          max-width: 560px;
-          width: 100%;
-        }
-        .events-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(clamp(130px,35vw,200px), 1fr));
-          gap: 10px;
-        }
+        .p1-content { max-width: 560px; width: 100%; }
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(130px,35vw,200px), 1fr)); gap: 10px; }
 
-        /* PANEL 2 — workshops (right-aligned desktop, centred mobile) */
         .p2-inner {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          width: 100%;
-          height: 100%;
-          box-sizing: border-box;
+          display: flex; align-items: center; justify-content: flex-end; width: 100%; height: 100%; box-sizing: border-box;
           padding: clamp(80px,14vw,120px) clamp(16px,5vw,80px) clamp(24px,4vw,60px);
         }
-        .p2-content {
-          max-width: 520px;
-          width: 100%;
-          text-align: right;
-        }
+        .p2-content { max-width: 520px; width: 100%; text-align: right; }
 
-        /* PANEL 3 — CTA (centred) */
         .p3-inner {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          width: 100%;
-          height: 100%;
-          box-sizing: border-box;
+          display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+          width: 100%; height: 100%; box-sizing: border-box;
           padding: clamp(80px,14vw,120px) 20px clamp(48px,6vw,80px);
         }
 
-        /* ── Mobile overrides (<= 640px) ──────────────────────────── */
+        /* ── Mobile overrides ──────────────────────────── */
         @media (max-width: 640px) {
-          .p1-inner { justify-content: center; }
-          .p2-inner { justify-content: center; }
+          .p1-inner, .p2-inner { justify-content: center; }
           .p2-content { text-align: left; }
           .p2-label  { justify-content: flex-start !important; }
           .workshop-row { flex-direction: row-reverse !important; justify-content: flex-start !important; }
           .workshop-text { text-align: left !important; }
-          /* hide side progress dots on tiny screens */
           .side-dots { display: none !important; }
-          /* corner brackets shrink */
           .corner { width: 14px !important; height: 14px !important; }
         }
       `}</style>
@@ -268,20 +283,17 @@ export default function HeroScroller() {
       <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '700vh', background: '#050505' }}>
         <div style={{ position: 'sticky', top: 0, width: '100%', height: '100vh', overflow: 'hidden' }}>
 
-          {/* Canvas */}
           <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }} />
 
-          {/* Dark overlay */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%)' }} />
 
-          {/* Grow line */}
           <div ref={lineRef} style={{
             position: 'absolute', top: '50%', left: 0, width: '100%', height: 1,
             background: `linear-gradient(90deg, transparent, rgba(0,255,136,0.2), transparent)`,
             transform: 'scaleX(0)', transformOrigin: 'left', zIndex: 15, pointerEvents: 'none',
+            willChange: 'transform'
           }} />
 
-          {/* Corner brackets */}
           {([
             { top:20, left:20,  borderTop:'1px solid rgba(0,255,136,0.2)', borderLeft:'1px solid rgba(0,255,136,0.2)' },
             { top:20, right:20, borderTop:'1px solid rgba(0,255,136,0.2)', borderRight:'1px solid rgba(0,255,136,0.2)' },
@@ -291,14 +303,12 @@ export default function HeroScroller() {
             <div className="corner" key={i} style={{ position:'absolute', width:20, height:20, zIndex:20, pointerEvents:'none', ...s }} />
           ))}
 
-          {/* Side progress dots */}
           <div className="side-dots" style={{ position:'absolute', right:20, top:'50%', transform:'translateY(-50%)', zIndex:20, display:'flex', flexDirection:'column', gap:7, alignItems:'center', pointerEvents:'none' }}>
             {[1,0,0,0].map((active,i) => (
-              <div key={i} style={{ width:3, height: active ? 20:6, borderRadius:10, background: active ? G : 'rgba(255,255,255,0.18)', boxShadow: active ? `0 0 8px ${G}`:'' }} />
+              <div key={i} style={{ width:3, height: active ? 20:6, borderRadius:10, background: active ? G : 'rgba(255,255,255,0.18)', boxShadow: active ? `0 0 8px ${G}`:'', transition: 'all 0.3s ease' }} />
             ))}
           </div>
 
-          {/* ── PANEL 0 · INTRO ─────────────────────────────────── */}
           <div ref={panel0Ref} className="panel-abs" style={{ inset:0, zIndex:20 }}>
             <div className="p0-inner">
               <div style={{ ...labelSt, justifyContent:'center', marginBottom:16 }}>
@@ -343,7 +353,6 @@ export default function HeroScroller() {
             </div>
           </div>
 
-          {/* ── PANEL 1 · EVENTS ────────────────────────────────── */}
           <div ref={panel1Ref} className="panel-abs" style={{ inset:0, zIndex:20, opacity:0 }}>
             <div className="p1-inner">
               <div className="p1-content">
@@ -367,7 +376,6 @@ export default function HeroScroller() {
             </div>
           </div>
 
-          {/* ── PANEL 2 · WORKSHOPS ─────────────────────────────── */}
           <div ref={panel2Ref} className="panel-abs" style={{ inset:0, zIndex:20, opacity:0 }}>
             <div className="p2-inner">
               <div className="p2-content">
@@ -403,7 +411,6 @@ export default function HeroScroller() {
             </div>
           </div>
 
-          {/* ── PANEL 3 · CTA ───────────────────────────────────── */}
           <div ref={panel3Ref} className="panel-abs" style={{ inset:0, zIndex:20, opacity:0 }}>
             <div className="p3-inner">
               <div style={{ position:'absolute', width:'min(420px,80vw)', height:'min(420px,80vw)', borderRadius:'50%', background:`radial-gradient(circle,rgba(0,255,136,0.06) 0%,transparent 70%)`, pointerEvents:'none' }} />
@@ -425,35 +432,16 @@ export default function HeroScroller() {
               </p>
 
               <div style={{ display:'flex', gap:12, flexWrap:'wrap', justifyContent:'center' }}>
-                <button style={{
-                  padding:'12px clamp(20px,4vw,30px)', borderRadius:8, background:G,
-                  color:'#050505', fontFamily:"'JetBrains Mono',monospace",
-                  fontSize:'clamp(0.68rem,1.5vw,0.78rem)', fontWeight:700, letterSpacing:'0.1em',
-                  border:'none', cursor:'pointer',
-                  boxShadow:`0 0 22px rgba(0,255,136,0.4)`,
-                  transition:'transform 0.2s, box-shadow 0.2s', pointerEvents:'auto',
-                }}
-                  onMouseEnter={e=>{(e.currentTarget as HTMLElement).style.transform='translateY(-2px)';(e.currentTarget as HTMLElement).style.boxShadow=`0 0 36px rgba(0,255,136,0.6)`;}}
-                  onMouseLeave={e=>{(e.currentTarget as HTMLElement).style.transform='';(e.currentTarget as HTMLElement).style.boxShadow=`0 0 22px rgba(0,255,136,0.4)`;}}
-                >
+                <button className="btn-primary">
                   &gt;_ JOIN THE CLUB
                 </button>
-                <button style={{
-                  padding:'11px clamp(20px,4vw,30px)', borderRadius:8, background:'transparent',
-                  color:'rgba(255,255,255,0.65)', fontFamily:"'JetBrains Mono',monospace",
-                  fontSize:'clamp(0.68rem,1.5vw,0.78rem)', fontWeight:500, letterSpacing:'0.1em',
-                  border:'1px solid rgba(0,255,136,0.22)', cursor:'pointer',
-                  transition:'all 0.2s', pointerEvents:'auto',
-                }}
-                  onMouseEnter={e=>{const t=e.currentTarget as HTMLElement;t.style.borderColor=`rgba(0,255,136,0.55)`;t.style.color=G;}}
-                  onMouseLeave={e=>{const t=e.currentTarget as HTMLElement;t.style.borderColor='rgba(0,255,136,0.22)';t.style.color='rgba(255,255,255,0.65)';}}
-                >
+                <button className="btn-secondary">
                   VIEW EVENTS
                 </button>
               </div>
 
               <div style={{ position:'absolute', bottom:20, left:'50%', transform:'translateX(-50%)', fontFamily:"'JetBrains Mono',monospace", fontSize:'0.5rem', color:'rgba(255,255,255,0.15)', letterSpacing:'0.22em', textTransform:'uppercase', whiteSpace:'nowrap' }}>
-                Birla Institute of Applied Sciences · Coding Club © 2025
+                Birla Institute of Applied Sciences · Coding Club © 2026
               </div>
             </div>
           </div>
