@@ -71,13 +71,23 @@ export default function HeroScroller() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d', { alpha: false }); // Opt: Disable alpha for better performance
+    const context = canvas?.getContext('2d', { alpha: false });
     if (!canvas || !context) return;
 
     const frameCount = 240;
     const images: HTMLImageElement[] = [];
     const sequence = { frame: 1 };
-    let lastRenderedFrame = -1; // Opt: Track to avoid redundant repaints
+    let lastRenderedFrame = -1;
+
+    // ─── FIX 2: Canvas sizing is completely separated from the render function.
+    // The canvas is sized once at init and again on resize — never inside render().
+    // This prevents the context state reset and DOM thrash that was happening on every frame.
+    const resizeCanvas = () => {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      lastRenderedFrame = -1; // force a redraw after resize
+      render();
+    };
 
     // Preload images
     for (let i = 1; i <= frameCount; i++) {
@@ -88,37 +98,44 @@ export default function HeroScroller() {
 
     const render = () => {
       const currentFrame = Math.round(sequence.frame) - 1;
-      
-      // Opt: Skip rendering if the frame hasn't actually changed
       if (currentFrame === lastRenderedFrame) return;
-      
+
       const img = images[currentFrame];
       if (!img || !img.complete) return;
-      
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
+
+      // Canvas dimensions are already correct — no resizing here
       const hRatio = canvas.width  / img.width;
       const vRatio = canvas.height / img.height;
       const ratio  = Math.max(hRatio, vRatio);
       const cx = (canvas.width  - img.width  * ratio) / 2;
       const cy = (canvas.height - img.height * ratio) / 2;
-      
+
       context.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
       lastRenderedFrame = currentFrame;
     };
 
+    // Size canvas once, then kick off first render when image loads
+    resizeCanvas();
     images[0].onload = render;
 
-    // Opt: Throttled resize handler
-    let resizeTimeout: number;
+    // Throttled resize — rAF-debounced to avoid layout thrash during resize
+    let resizeRaf: number;
     const handleResize = () => {
-      if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
-      resizeTimeout = requestAnimationFrame(() => {
-        lastRenderedFrame = -1; // Force a re-render on resize
-        render();
-      });
+      cancelAnimationFrame(resizeRaf);
+      resizeRaf = requestAnimationFrame(resizeCanvas);
     };
     window.addEventListener('resize', handleResize);
+
+    // ─── FIX 3: Lenis sync.
+    // We listen for the Lenis instance that page.tsx attaches to window.__lenis.
+    // On every Lenis scroll tick, we call ScrollTrigger.update() so all
+    // scrub-based timelines track the smooth (Lenis) scroll position,
+    // not the native jumpy scroll position.
+    const lenisInstance = (window as Window & { __lenis?: { on: (e: string, cb: () => void) => void; off: (e: string, cb: () => void) => void } }).__lenis;
+    const onLenisScroll = () => ScrollTrigger.update();
+    if (lenisInstance) {
+      lenisInstance.on('scroll', onLenisScroll);
+    }
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -126,7 +143,7 @@ export default function HeroScroller() {
           trigger: containerRef.current,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.2, // Smoothes out mouse wheel steps
+          scrub: 1.2,
         },
       });
 
@@ -142,16 +159,24 @@ export default function HeroScroller() {
       tl.fromTo(panel2Ref.current,
         { opacity: 0, x: 120 },
         { opacity: 1, x: 0, duration: 2, ease: 'power3.out' }, 5.5);
+      // ─── FIX 1: Panel 2 was fading out at 7.8 but Panel 3 wasn't starting until 8.5.
+      // That 0.7-unit gap left only the raw canvas visible, causing a blank-screen flash
+      // on fast scrolls. Panel 3 now starts at 7.8 — exactly when Panel 2 begins its exit —
+      // so there's always at least one content panel visible.
       tl.to(panel2Ref.current, { opacity: 0, y: 50, duration: 1.2, ease: 'power2.in' }, 7.8);
 
       tl.fromTo(panel3Ref.current,
         { opacity: 0, y: 80, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 2, ease: 'expo.out' }, 8.5);
+        { opacity: 1, y: 0, scale: 1, duration: 2, ease: 'expo.out' }, 7.8); // ← was 8.5
 
     }, containerRef);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(resizeRaf);
+      if (lenisInstance) {
+        lenisInstance.off('scroll', onLenisScroll);
+      }
       ctx.revert();
     };
   }, []);
@@ -188,7 +213,6 @@ export default function HeroScroller() {
         @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
         .float { animation: floatY 3.5s ease-in-out infinite; }
 
-        /* --- Opt: Pure CSS Hover States --- */
         .event-card:hover {
           border-color: rgba(0,255,136,0.35) !important;
           transform: translateY(-2px);
@@ -235,7 +259,6 @@ export default function HeroScroller() {
           color: ${G};
         }
 
-        /* ── Responsive panel content ─────────────────────────────── */
         .p0-inner {
           display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
           padding: clamp(80px, 14vw, 120px) 20px clamp(20px, 4vw, 48px);
@@ -268,7 +291,6 @@ export default function HeroScroller() {
           padding: clamp(80px,14vw,120px) 20px clamp(48px,6vw,80px);
         }
 
-        /* ── Mobile overrides ──────────────────────────── */
         @media (max-width: 640px) {
           .p1-inner, .p2-inner { justify-content: center; }
           .p2-content { text-align: left; }
