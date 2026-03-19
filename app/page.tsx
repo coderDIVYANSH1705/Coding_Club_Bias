@@ -1,18 +1,69 @@
-import HeroScroller from '../Components/Hero';
-import HeaderSection from '../Components/HeaderSection';
-import CodingClubHeader from '../Components/HeaderSection';
-import Terminal from '../Components/Terminal';
-import About3D from '@/Components/About';
-import ClubTechStack from '../Components/TechnologyArsenal';
-import TechCentre from '../Components/TechCentre';
-import ScrollSequence from '../Components/TechCentre';
-import EventGallery from '../Components/EventGallery';
-import JoinClubForm from '../Components/JoinClub';
-import LeadershipSection from '@/Components/leadership';
-import RadarAbout from '@/Components/AboutTheClub';
-import Footer from '@/Components/footer';
-import AboutBento from '@/Components/AboutTheClub';
+"use client";
+
+import { useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import Lenis from "@studio-freight/lenis";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Static — above the fold
+import HeaderSection from "../Components/HeaderSection";
+import HeroScroller from "../Components/Hero";
+
+// Dynamic — below the fold
+const AboutBento        = dynamic(() => import("@/Components/AboutTheClub"),       { ssr: false });
+const LeadershipSection = dynamic(() => import("@/Components/leadership"),          { ssr: false });
+const Terminal          = dynamic(() => import("../Components/Terminal"),           { ssr: false });
+const EventGallery      = dynamic(() => import("../Components/EventGallery"),       { ssr: false });
+const About3D           = dynamic(() => import("@/Components/About"),              { ssr: false });
+const ClubTechStack     = dynamic(() => import("../Components/TechnologyArsenal"), { ssr: false });
+const JoinClubForm      = dynamic(() => import("../Components/JoinClub"),          { ssr: false });
+const Footer            = dynamic(() => import("@/Components/footer"),             { ssr: false });
+
+// Extend Window so TypeScript doesn't complain about __lenis
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
+
 export default function Page() {
+  const lenisRef = useRef<Lenis | null>(null);
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    lenisRef.current = lenis;
+
+    // ── FIX 3 (page side): expose the instance so child components
+    // (HeroScroller, etc.) can call lenis.on('scroll', ...) to sync
+    // ScrollTrigger to the smooth scroll position rather than native scroll.
+    window.__lenis = lenis;
+
+    // Keep GSAP ticker in sync with Lenis
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      lenis.destroy();
+      window.__lenis = undefined;
+      gsap.ticker.remove((time) => { lenis.raf(time * 1000); });
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+    };
+  }, []);
+
   return (
     <main>
       <HeaderSection />
@@ -20,11 +71,10 @@ export default function Page() {
       <AboutBento />
       <LeadershipSection />
       <Terminal />
-       <EventGallery />
+      <EventGallery />
       <About3D />
       <ClubTechStack />
       <JoinClubForm />
-      
       <Footer />
     </main>
   );
