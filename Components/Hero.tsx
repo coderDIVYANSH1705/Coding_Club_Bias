@@ -159,6 +159,19 @@ export default function HeroScroller() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@700;900&display=swap');
 
+        /* Animated gradient background for mobile */
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        .gradient-bg-mobile {
+          background: linear-gradient(-45deg, #0a0a0a, #1a0a15, #0d1410, #0a0f18);
+          background-size: 400% 400%;
+          animation: gradientShift 15s ease infinite;
+        }
+
         .panel-abs {
           position: absolute;
           pointer-events: none;
@@ -252,6 +265,12 @@ export default function HeroScroller() {
 
         /* ── Mobile overrides (<= 640px) ──────────────────────────── */
         @media (max-width: 640px) {
+          .gradient-bg-mobile {
+            background: linear-gradient(-45deg, #0a0a0a, #1a0a15, #0d1410, #0a0f18) !important;
+            background-size: 400% 400% !important;
+            animation: gradientShift 15s ease infinite !important;
+          }
+
           .p1-inner { justify-content: center; }
           .p2-inner { justify-content: center; }
           .p2-content { text-align: left; }
@@ -263,16 +282,40 @@ export default function HeroScroller() {
           /* corner brackets shrink */
           .corner { width: 14px !important; height: 14px !important; }
         }
+
+        /* ── Tablet & up (> 640px) ──────────────────────────────── */
+        @media (min-width: 641px) {
+          .gradient-bg-mobile {
+            display: none !important;
+          }
+        }
       `}</style>
 
       <div ref={containerRef} style={{ position: 'relative', width: '100%', height: '700vh', background: '#050505' }}>
-        <div style={{ position: 'sticky', top: 0, width: '100%', height: '100vh', overflow: 'hidden' }}>
+        <div style={{ 
+          position: 'sticky', 
+          top: 0, 
+          width: '100%', 
+          height: '100vh', 
+          overflow: 'hidden',
+          background: window.innerWidth < 768 ? undefined : 'linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #0d1410 100%)'
+        }}
+        className={window.innerWidth < 768 ? 'gradient-bg-mobile' : ''}
+        >
 
           {/* Canvas */}
-          <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }} />
+          <canvas ref={canvasRef} style={{ 
+            position: 'absolute', 
+            inset: 0, 
+            width: '100%', 
+            height: '100%', 
+            zIndex: 0,
+            opacity: window.innerWidth >= 768 ? 1 : 0.6,
+            filter: window.innerWidth < 768 ? 'blur(0px) brightness(0.85)' : 'none'
+          }} />
 
           {/* Dark overlay */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none', background: window.innerWidth >= 768 ? 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%)' : 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(10,10,20,0.6) 100%)' }} />
 
           {/* Grow line */}
           <div ref={lineRef} style={{
