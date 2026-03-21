@@ -110,7 +110,7 @@ export default function Footer() {
           <p>
             © {currentYear} BIAS Coding Club. Execute local environment.
           </p>
-          <Link href="/components/team">
+          <Link href="/team">
     <span className="text-[#00FF41] font-bold cursor-pointer hover:underline">
       Develped By - Divyansh Mishra and Jayendra Nayal 
     </span>
