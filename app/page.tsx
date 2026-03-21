@@ -19,6 +19,7 @@ const About3D           = dynamic(() => import("@/Components/About"),           
 const ClubTechStack     = dynamic(() => import("../Components/TechnologyArsenal"), { ssr: false });
 const JoinClubForm      = dynamic(() => import("../Components/JoinClub"),          { ssr: false });
 const Footer            = dynamic(() => import("@/Components/footer"),             { ssr: false });
+const UpcomingEvents    = dynamic(() => import('../Components/UpcomingEvents'),    { ssr: false });
 
 // Extend Window so TypeScript doesn't complain about __lenis
 declare global {
@@ -46,8 +47,8 @@ export default function Page() {
 
     lenisRef.current = lenis;
 
-    // ── FIX 3 (page side): expose the instance so child components
-    // (HeroScroller, etc.) can call lenis.on('scroll', ...) to sync
+    // expose the instance so child components
+    // can call lenis.on('scroll', ...) to sync
     // ScrollTrigger to the smooth scroll position rather than native scroll.
     window.__lenis = lenis;
 
@@ -74,6 +75,7 @@ export default function Page() {
       <EventGallery />
       <About3D />
       <ClubTechStack />
+      <UpcomingEvents />
       <JoinClubForm />
       <Footer />
     </main>
