@@ -11,7 +11,7 @@ const TEAM = [
     handle: 'divyansh',
     github: 'https://github.com/coderDIVYANSH1705',       // ← replace with real username
     linkedin: 'https:linkedin.com/in/divyansh-mishra-7b5064322', // ← replace with real profile
-    avatar: '/team/divyansh.jpg',                 // ← place photo in /public/team/
+    avatar: '/team/divyansh.png',                 // ← place photo in /public/team/
     index: '01',
     tags: ['Full Stack', 'System Design'],
   },
@@ -21,7 +21,7 @@ const TEAM = [
     handle: 'jayendra',
     github: 'https://github.com/Jayendra25',
     linkedin: 'https://linkedin.com/in/jayendra-singh-nayal-904191328',
-    avatar: '/team/jayendra.jpg',
+    avatar: '/team/jayendra.png    ',                 
     index: '02',
     tags: ['Backend', 'Frontend'],
   },
