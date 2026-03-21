@@ -12,7 +12,7 @@ import HeroScroller from "../Components/Hero";
 
 // Dynamic — below the fold
 const AboutBento        = dynamic(() => import("@/Components/AboutTheClub"),       { ssr: false });
-const LeadershipSection = dynamic(() => import("@/Components/leadership"),          { ssr: false });
+const LeadershipSection = dynamic(() => import("@/Components/leadership"),        { ssr: false });
 const Terminal          = dynamic(() => import("../Components/Terminal"),           { ssr: false });
 const EventGallery      = dynamic(() => import("../Components/EventGallery"),       { ssr: false });
 const About3D           = dynamic(() => import("@/Components/About"),              { ssr: false });

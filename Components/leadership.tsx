@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
@@ -10,19 +13,33 @@ type Leader = {
   github_link: string | null;
 };
 
-export default async function LeadershipSection() {
-  const { data, error } = await supabase
-    .from('leaders')
-    .select('*')
-    .order('created_at', { ascending: true });
+export default function LeadershipSection() {
+  const [leaders, setLeaders] = useState<Leader[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (error) console.error("Error fetching leaders:", error);
+  useEffect(() => {
+    const fetchLeaders = async () => {
+      const { data, error } = await supabase
+        .from('leaders')
+        .select('*')
+        .order('created_at', { ascending: true });
 
-  const leaders: Leader[] = data || [];
-  const faculty  = leaders.filter(l => l.category === 'Faculty');
+      if (error) {
+        console.error("Error fetching leaders:", error);
+      } else if (data) {
+        setLeaders(data);
+      }
+      setLoading(false);
+    };
+
+    fetchLeaders();
+  }, []);
+
+  const faculty = leaders.filter(l => l.category === 'Faculty');
   const students = leaders.filter(l => l.category === 'Student');
 
-  if (leaders.length === 0) return null;
+  // Prevent rendering empty space if DB is empty, but show loading state
+  if (!loading && leaders.length === 0) return null;
 
   return (
     <section
@@ -41,49 +58,47 @@ export default async function LeadershipSection() {
           </p>
         </header>
 
-        {/* ── Faculty ── */}
-        {faculty.length > 0 && (
-          <div className="space-y-6 md:space-y-8">
-            <h3 className="text-lg sm:text-2xl border-b border-[#00FF41]/20 pb-2 text-gray-300 inline-block">
-              &gt; Faculty Coordinators
-            </h3>
-
-            {/* 1 col on mobile, up to 3 centered on larger screens */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 justify-items-center">
-              {faculty.map(leader => (
-                <div key={leader.id} className="w-full max-w-xs sm:max-w-sm">
-                  <LeaderCard leader={leader} size="lg" />
+        {loading ? (
+          <div className="text-center text-[#00FF41] animate-pulse">Fetching personnel data...</div>
+        ) : (
+          <>
+            {/* ── Faculty ── */}
+            {faculty.length > 0 && (
+              <div className="space-y-6 md:space-y-8">
+                <h3 className="text-lg sm:text-2xl border-b border-[#00FF41]/20 pb-2 text-gray-300 inline-block">
+                  &gt; Faculty Coordinators
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 justify-items-center">
+                  {faculty.map(leader => (
+                    <div key={leader.id} className="w-full max-w-xs sm:max-w-sm">
+                      <LeaderCard leader={leader} size="lg" />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            )}
+
+            {/* ── Students ── */}
+            {students.length > 0 && (
+              <div className="space-y-6 md:space-y-8">
+                <h3 className="text-lg sm:text-2xl border-b border-[#00FF41]/20 pb-2 text-gray-300 inline-block">
+                  &gt; Student Coordinators
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
+                  {students.map(leader => (
+                    <LeaderCard key={leader.id} leader={leader} size="sm" />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
-
-        {/* ── Students ── */}
-        {students.length > 0 && (
-          <div className="space-y-6 md:space-y-8">
-            <h3 className="text-lg sm:text-2xl border-b border-[#00FF41]/20 pb-2 text-gray-300 inline-block">
-              &gt; Student Coordinators
-            </h3>
-
-            {/* 2 col on mobile → 3 on md → 4 on lg */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
-              {students.map(leader => (
-                <LeaderCard key={leader.id} leader={leader} size="sm" />
-              ))}
-            </div>
-          </div>
-        )}
-
       </div>
     </section>
   );
 }
 
-/* ── LeaderCard ─────────────────────────────────────────────────────────────
-   size="lg" → Faculty (bigger avatar, more padding)
-   size="sm" → Students (compact, 2-col friendly on mobile)
-──────────────────────────────────────────────────────────────────────────── */
+// ... Keep your existing LeaderCard function exactly the same down here ...
 function LeaderCard({ leader, size = "sm" }: { leader: Leader; size?: "lg" | "sm" }) {
   const isLg = size === "lg";
 
@@ -91,13 +106,11 @@ function LeaderCard({ leader, size = "sm" }: { leader: Leader; size?: "lg" | "sm
     <div className="group relative border border-[#00FF41]/20 bg-[#050505] overflow-hidden hover:border-[#00FF41] hover:shadow-[0_0_25px_rgba(0,255,65,0.15)] transition-all duration-500 flex flex-col items-center text-center h-full"
       style={{ padding: isLg ? "1.5rem" : "0.875rem" }}
     >
-      {/* Terminal corners */}
       <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#00FF41] opacity-50" />
       <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#00FF41] opacity-50" />
       <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#00FF41] opacity-50" />
       <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#00FF41] opacity-50" />
 
-      {/* Avatar */}
       <div
         className="relative mb-3 rounded-full overflow-hidden border-2 border-[#00FF41]/30 group-hover:border-[#00FF41] transition-colors duration-500 flex-shrink-0"
         style={{
@@ -114,7 +127,6 @@ function LeaderCard({ leader, size = "sm" }: { leader: Leader; size?: "lg" | "sm
         />
       </div>
 
-      {/* Name */}
       <h3
         className="font-bold text-gray-100 mb-1 leading-snug"
         style={{ fontSize: isLg ? "clamp(0.95rem, 2.5vw, 1.25rem)" : "clamp(0.75rem, 3.5vw, 0.95rem)" }}
@@ -122,7 +134,6 @@ function LeaderCard({ leader, size = "sm" }: { leader: Leader; size?: "lg" | "sm
         {leader.name}
       </h3>
 
-      {/* Role */}
       <p
         className="text-[#00FF41] uppercase tracking-widest font-bold mb-3"
         style={{ fontSize: isLg ? "0.7rem" : "0.6rem" }}
@@ -130,7 +141,6 @@ function LeaderCard({ leader, size = "sm" }: { leader: Leader; size?: "lg" | "sm
         {leader.role}
       </p>
 
-      {/* GitHub link */}
       {leader.github_link && (
         <a
           href={leader.github_link}
