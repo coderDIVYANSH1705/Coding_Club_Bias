@@ -30,8 +30,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/leaders" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200">
   ~/manage_leaders
 </Link>
- <Link href="/admin/upcoming" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200">
-            ~/UpcomingEvents
+ <Link href="/admin/future" className="hover:bg-[#00FF41]/10 px-3 py-2 rounded transition-colors duration-200">
+            ~/upcoming
           </Link>
 
 

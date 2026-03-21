@@ -1,48 +1,26 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { createClient } from '@supabase/supabase-js';
 
-// Replace this with a fetch call to your database in production
-const MOCK_EVENTS = [
-  {
-    id: '1',
-    title: 'BIAS 48-Hour Hackathon',
-    date: 'MAR 15',
-    time: '10:00 AM - 10:00 AM (48hrs)',
-    location: 'Main Auditorium / Online',
-    type: 'Hackathon',
-    description: 'Build, break, and deploy. Join 200+ developers for our flagship annual hackathon. Cash prizes and cloud credits up for grabs.',
-    registrationLink: '#',
-    isActive: true,
-  },
-  {
-    id: '2',
-    title: 'Next.js & Server Actions Masterclass',
-    date: 'MAR 22',
-    time: '04:00 PM - 06:00 PM',
-    location: 'Lab 3',
-    type: 'Workshop',
-    description: 'Deep dive into React Server Components, caching strategies, and building full-stack applications without traditional APIs.',
-    registrationLink: '#',
-    isActive: true,
-  },
-  {
-    id: '3',
-    title: 'DSA Championship Circuit',
-    date: 'APR 02',
-    time: '05:00 PM - 08:00 PM',
-    location: 'Online (HackerRank)',
-    type: 'Competition',
-    description: 'Test your algorithmic skills against the best minds on campus. Graph theory, dynamic programming, and advanced data structures.',
-    registrationLink: '#',
-    isActive: true,
-  }
-];
+// Initialize Supabase Client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-const G = '#00ff88';
+interface ClubEvent {
+  id: string;
+  title: string;
+  event_date: string;
+  time_string: string;
+  location: string;
+  event_type: string;
+  description: string;
+  registration_link: string;
+}
 
-const EventCard = ({ event, index }: { event: any, index: number }) => {
+const EventCard = ({ event, index }: { event: ClubEvent, index: number }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -51,16 +29,15 @@ const EventCard = ({ event, index }: { event: any, index: number }) => {
       transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
       className="group relative flex flex-col md:flex-row gap-6 p-6 rounded-2xl bg-zinc-950/40 border border-white/5 hover:border-[#00ff88]/30 transition-all duration-500 backdrop-blur-md overflow-hidden"
     >
-      {/* Background Hover Glow */}
       <div className="absolute -inset-px bg-gradient-to-r from-[#00ff88]/0 via-[#00ff88]/5 to-[#00ff88]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none" />
 
       {/* Left: Date Block */}
       <div className="flex-shrink-0 flex md:flex-col items-center justify-center gap-2 md:gap-0 md:w-32 py-4 md:py-6 rounded-xl bg-black/40 border border-white/5 group-hover:border-[#00ff88]/20 transition-colors">
         <span className="font-['Orbitron'] text-2xl md:text-3xl font-black text-white group-hover:text-[#00ff88] transition-colors tracking-tighter">
-          {event.date.split(' ')[1]}
+          {event.event_date.split(' ')[1] || event.event_date}
         </span>
         <span className="font-['JetBrains_Mono'] text-xs md:text-sm tracking-[0.2em] text-zinc-500 uppercase">
-          {event.date.split(' ')[0]}
+          {event.event_date.split(' ')[0] || ''}
         </span>
       </div>
 
@@ -68,11 +45,11 @@ const EventCard = ({ event, index }: { event: any, index: number }) => {
       <div className="flex flex-col flex-grow justify-center">
         <div className="flex items-center gap-3 mb-3 flex-wrap">
           <span className="px-3 py-1 text-[10px] font-bold font-['JetBrains_Mono'] uppercase tracking-widest text-[#00ff88] bg-[#00ff88]/10 border border-[#00ff88]/20 rounded-full">
-            {event.type}
+            {event.event_type}
           </span>
           <span className="text-zinc-400 text-xs font-['JetBrains_Mono'] flex items-center gap-2">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            {event.time}
+            {event.time_string}
           </span>
         </div>
 
@@ -91,7 +68,9 @@ const EventCard = ({ event, index }: { event: any, index: number }) => {
           </span>
           
           <a 
-            href={event.registrationLink}
+            href={event.registration_link}
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-6 py-2 bg-transparent border border-[#00ff88]/30 text-[#00ff88] hover:bg-[#00ff88] hover:text-black font-['JetBrains_Mono'] text-xs font-bold tracking-widest uppercase transition-all duration-300 rounded-lg"
           >
             Register /&gt;
@@ -105,18 +84,35 @@ const EventCard = ({ event, index }: { event: any, index: number }) => {
 export default function UpcomingEvents() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
+  
+  const [events, setEvents] = useState<ClubEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const activeEvents = MOCK_EVENTS.filter(e => e.isActive);
+  useEffect(() => {
+    const fetchLiveEvents = async () => {
+      // Only fetch events where is_active is true
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('is_active', true)
+        .order('event_date', { ascending: true });
+
+      if (!error && data) {
+        setEvents(data);
+      }
+      setLoading(false);
+    };
+
+    fetchLiveEvents();
+  }, []);
 
   return (
     <section className="relative w-full min-h-screen bg-[#050505] py-24 md:py-32 overflow-hidden" id="events">
-      {/* Background effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[1px] bg-gradient-to-r from-transparent via-[#00ff88]/20 to-transparent" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#00ff88]/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-6" ref={containerRef}>
         
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
@@ -131,22 +127,16 @@ export default function UpcomingEvents() {
               Upcoming <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff88] to-[#00cfff]">Events</span>
             </h2>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          >
-            <p className="text-zinc-500 font-['JetBrains_Mono'] text-sm max-w-xs md:text-right">
-              Don't miss out on our latest workshops, hackathons, and guest lectures.
-            </p>
-          </motion.div>
         </div>
 
         {/* Events List */}
         <div className="flex flex-col gap-4">
-          {activeEvents.length > 0 ? (
-            activeEvents.map((event, index) => (
+          {loading ? (
+             <div className="py-20 text-center border border-dashed border-white/10 rounded-2xl bg-white/5">
+               <p className="text-[#00ff88] font-['JetBrains_Mono'] animate-pulse">Initializing Database Connection...</p>
+             </div>
+          ) : events.length > 0 ? (
+            events.map((event, index) => (
               <EventCard key={event.id} event={event} index={index} />
             ))
           ) : (
