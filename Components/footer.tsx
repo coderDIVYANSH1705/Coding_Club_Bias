@@ -110,9 +110,11 @@ export default function Footer() {
           <p>
             © {currentYear} BIAS Coding Club. Execute local environment.
           </p>
-          <p className="flex items-center gap-1.5">
-            Compiled by <span className="text-[#00FF41] font-bold">Divyansh & the Core Team</span>
-          </p>
+          <Link href="/components/team">
+    <span className="text-[#00FF41] font-bold cursor-pointer hover:underline">
+      Divyansh & the Core Team
+    </span>
+  </Link>
         </div>
 
       </div>
