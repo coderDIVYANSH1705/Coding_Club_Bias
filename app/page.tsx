@@ -19,7 +19,7 @@ const About3D           = dynamic(() => import("@/Components/About"),           
 const ClubTechStack     = dynamic(() => import("../Components/TechnologyArsenal"), { ssr: false });
 const JoinClubForm      = dynamic(() => import("../Components/JoinClub"),          { ssr: false });
 const Footer            = dynamic(() => import("@/Components/footer"),             { ssr: false });
-const UpcomingEvents    = dynamic(() => import('../Components/UpcomingEvents'),    { ssr: false });
+const UpcomingEvents    = dynamic(() => import('../Components/future'),    { ssr: false });
 
 // Extend Window so TypeScript doesn't complain about __lenis
 declare global {

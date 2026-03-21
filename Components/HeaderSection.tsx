@@ -18,7 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "About the Club", scrollTo: "about" },
   { label: "Arena", href: "/arena" },
-  { label: "Upcoming Events", scrollTo: "upcoming-events" },
+  { label: "Upcoming Events", scrollTo: "events" },
   { label: "Gallery", scrollTo: "gallery" },
 ];
 

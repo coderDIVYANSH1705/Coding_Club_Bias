@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import UpcomingEvents from '../../Components/UpcomingEvents';
+import UpcomingEvents from '../../Components/future';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
