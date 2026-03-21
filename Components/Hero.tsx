@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Threads from './Threads'; // Make sure this path is correct for your structure
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -69,109 +70,29 @@ export default function HeroScroller() {
   const panel3Ref    = useRef<HTMLDivElement>(null);
   const lineRef      = useRef<HTMLDivElement>(null);
 
+  // Responsive state
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext('2d', { alpha: false });
-    if (!canvas || !context) return;
+    setMounted(true);
+    const mql = window.matchMedia('(max-width: 768px)');
+    setIsMobile(mql.matches);
+    
+    const handleMediaChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener('change', handleMediaChange);
+    return () => mql.removeEventListener('change', handleMediaChange);
+  }, []);
 
-    const frameCount = 240;
-    const images: HTMLImageElement[] = new Array(frameCount);
-    const sequence = { frame: 1 };
-    let lastRenderedFrame = -1;
+  useEffect(() => {
+    if (!mounted) return;
 
-    // ── Canvas sizing (always separate from render)
-    const resizeCanvas = () => {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
-      lastRenderedFrame = -1;
-      render();
-    };
-
-    // ── FIX A: Fallback renderer
-    // When the exact frame isn't loaded yet, walk backwards to find the nearest
-    // already-loaded frame and draw that instead of silently skipping.
-    // Result: user sees a slightly stale frame instead of a freeze.
-    const render = () => {
-      const targetFrame = Math.round(sequence.frame) - 1;
-
-      // Walk back from targetFrame until we find a complete image
-      let frameToRender = targetFrame;
-      while (frameToRender >= 0) {
-        const img = images[frameToRender];
-        if (img?.complete && img.naturalWidth > 0) break;
-        frameToRender--;
-      }
-      if (frameToRender < 0) return;           // nothing loaded yet
-      if (frameToRender === lastRenderedFrame) return; // no change
-
-      const img = images[frameToRender];
-      const hRatio = canvas.width  / img.width;
-      const vRatio = canvas.height / img.height;
-      const ratio  = Math.max(hRatio, vRatio);
-      const cx = (canvas.width  - img.width  * ratio) / 2;
-      const cy = (canvas.height - img.height * ratio) / 2;
-      context.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
-      lastRenderedFrame = frameToRender;
-    };
-
-    // ── FIX B + C: Priority-based batched loading
-    //
-    // Problem: firing all 240 new Image() simultaneously saturates the browser's
-    // ~6 concurrent connections per origin. Frames 1-6 decode immediately, then
-    // everything else queues. Mid-sequence frames (30-120) arrive late → scroll
-    // reaches them before they're ready → render() skips → visual freeze.
-    //
-    // Solution: load in 3 sequential priority batches.
-    //   Batch 1 — frames   1–40  (CRITICAL): covers the opening, loads first
-    //   Batch 2 — frames  41–120 (HIGH):     covers the mid freeze zone
-    //   Batch 3 — frames 121–240 (NORMAL):   covers the end, loads last
-    //
-    // Within each batch images load in parallel (normal browser behaviour).
-    // Between batches they fire sequentially so the network never gets overwhelmed.
-    // fetchpriority="high" on batch 1 ensures the browser fast-tracks those requests.
-
-    const loadBatch = (start: number, end: number, onComplete?: () => void) => {
-      let loaded = 0;
-      const count = end - start + 1;
-      for (let i = start; i <= end; i++) {
-        const img = new Image();
-        if (start === 1) {
-          (img as HTMLImageElement & { fetchpriority?: string }).fetchpriority = 'high';
-        }
-        img.onload = () => {
-          loaded++;
-          render(); // re-render on every load in case scroll is waiting on this frame
-          if (loaded === count) onComplete?.();
-        };
-        img.onerror = () => {
-          loaded++;
-          if (loaded === count) onComplete?.();
-        };
-        img.src = `/Hero/${i}.jpg`;
-        images[i - 1] = img;
-      }
-    };
-
-    // Sequential batch chain: critical → high → normal
-    loadBatch(1, 40, () =>
-      loadBatch(41, 120, () =>
-        loadBatch(121, frameCount)
-      )
-    );
-
-    resizeCanvas();
-
-    let resizeRaf: number;
-    const handleResize = () => {
-      cancelAnimationFrame(resizeRaf);
-      resizeRaf = requestAnimationFrame(resizeCanvas);
-    };
-    window.addEventListener('resize', handleResize);
-
-    // ── Lenis sync
-    const lenisInstance = (window as Window & { __lenis?: { on: (e: string, cb: () => void) => void; off: (e: string, cb: () => void) => void } }).__lenis;
+    // Ensure Lenis scroll is synced with GSAP
+    const lenisInstance = (window as any).__lenis;
     const onLenisScroll = () => ScrollTrigger.update();
     if (lenisInstance) lenisInstance.on('scroll', onLenisScroll);
+
+    let handleCanvasResize: () => void;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -183,7 +104,71 @@ export default function HeroScroller() {
         },
       });
 
-      tl.to(sequence, { frame: frameCount, snap: 'frame', ease: 'none', onUpdate: render, duration: 10 }, 0);
+      // ── ONLY RUN HEAVY CANVAS LOGIC ON DESKTOP ──
+      if (!isMobile) {
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d', { alpha: false });
+        
+        if (canvas && context) {
+          const frameCount = 240;
+          const images: HTMLImageElement[] = new Array(frameCount);
+          const sequence = { frame: 1 };
+          let lastRenderedFrame = -1;
+
+          handleCanvasResize = () => {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+            lastRenderedFrame = -1;
+            render();
+          };
+
+          const render = () => {
+            const targetFrame = Math.round(sequence.frame) - 1;
+            let frameToRender = targetFrame;
+            
+            // Walk backwards to find nearest loaded frame to prevent skipping
+            while (frameToRender >= 0) {
+              const img = images[frameToRender];
+              if (img?.complete && img.naturalWidth > 0) break;
+              frameToRender--;
+            }
+            if (frameToRender < 0 || frameToRender === lastRenderedFrame) return;
+
+            const img = images[frameToRender];
+            const hRatio = canvas.width  / img.width;
+            const vRatio = canvas.height / img.height;
+            const ratio  = Math.max(hRatio, vRatio);
+            const cx = (canvas.width  - img.width  * ratio) / 2;
+            const cy = (canvas.height - img.height * ratio) / 2;
+            context.drawImage(img, 0, 0, img.width, img.height, cx, cy, img.width * ratio, img.height * ratio);
+            lastRenderedFrame = frameToRender;
+          };
+
+          const loadBatch = (start: number, end: number, onComplete?: () => void) => {
+            let loaded = 0;
+            const count = end - start + 1;
+            for (let i = start; i <= end; i++) {
+              const img = new Image();
+              if (start === 1) (img as any).fetchpriority = 'high';
+              img.onload = () => { loaded++; render(); if (loaded === count) onComplete?.(); };
+              img.onerror = () => { loaded++; if (loaded === count) onComplete?.(); };
+              img.src = `/Hero/${i}.jpg`;
+              images[i - 1] = img;
+            }
+          };
+
+          // Sequential batch loading
+          loadBatch(1, 40, () => loadBatch(41, 120, () => loadBatch(121, frameCount)));
+          
+          handleCanvasResize();
+          window.addEventListener('resize', handleCanvasResize);
+
+          // Animate canvas sequence
+          tl.to(sequence, { frame: frameCount, snap: 'frame', ease: 'none', onUpdate: render, duration: 10 }, 0);
+        }
+      }
+
+      // ── UI PANEL ANIMATIONS (Apply to BOTH Mobile and Desktop) ──
       tl.to(panel0Ref.current, { opacity: 0, scale: 0.93, y: -50, duration: 1.5, ease: 'power2.inOut' }, 0);
       tl.fromTo(lineRef.current, { scaleX: 0 }, { scaleX: 1, duration: 1, ease: 'power2.out' }, 1.2);
 
@@ -204,12 +189,11 @@ export default function HeroScroller() {
     }, containerRef);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(resizeRaf);
-      if (lenisInstance) lenisInstance.off('scroll', onLenisScroll);
       ctx.revert();
+      if (handleCanvasResize) window.removeEventListener('resize', handleCanvasResize);
+      if (lenisInstance) lenisInstance.off('scroll', onLenisScroll);
     };
-  }, []);
+  }, [mounted, isMobile]);
 
   const labelSt: React.CSSProperties = {
     fontFamily: "'JetBrains Mono', monospace",
@@ -262,7 +246,18 @@ export default function HeroScroller() {
       <div ref={containerRef} style={{ position:'relative', width:'100%', height:'700vh', background:'#050505' }}>
         <div style={{ position:'sticky', top:0, width:'100%', height:'100vh', overflow:'hidden' }}>
 
-          <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%', zIndex:0 }} />
+          {/* DYNAMIC BACKGROUND */}
+          {mounted && !isMobile && (
+            <canvas ref={canvasRef} style={{ position:'absolute', inset:0, width:'100%', height:'100%', zIndex:0 }} />
+          )}
+          
+          {mounted && isMobile && (
+            <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0, opacity: 0.6 }}>
+             <Threads />
+            </div>
+          )}
+
+          {/* Dark Overlay (Ensures text remains readable over Threads) */}
           <div style={{ position:'absolute', inset:0, zIndex:1, pointerEvents:'none', background:'linear-gradient(to bottom,rgba(0,0,0,0.65) 0%,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.8) 100%)' }} />
 
           <div ref={lineRef} style={{ position:'absolute', top:'50%', left:0, width:'100%', height:1, background:`linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent)`, transform:'scaleX(0)', transformOrigin:'left', zIndex:15, pointerEvents:'none', willChange:'transform' }} />
