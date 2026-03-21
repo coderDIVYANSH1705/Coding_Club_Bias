@@ -112,7 +112,7 @@ export default function Footer() {
           </p>
           <Link href="/components/team">
     <span className="text-[#00FF41] font-bold cursor-pointer hover:underline">
-      Divyansh & the Core Team
+      Develped By - Divyansh Mishra and Jayendra Nayal 
     </span>
   </Link>
         </div>
